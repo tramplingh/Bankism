@@ -154,7 +154,7 @@ Import the repo in Vercel (it detects Next.js automatically), add the environmen
 environment settings: `.env*` is git-ignored.
 
 ## Models, APIs and frameworks
-- **Google Gemini** (`gemini-2.5-flash` by default; override with `GEMINI_MODEL`) via `@google/genai`, using JSON-schema structured output and thinking disabled for latency.
+- **Google Gemini** (`gemini-3.8-flash` by default; override with `GEMINI_MODEL`) via `@google/genai`, using JSON-schema structured output at temperature 0.
 - **Next.js 15** (App Router) + **TypeScript** on **Vercel**. One repository, one deployment.
 - **Zod** for runtime validation of everything the LLM returns.
 - **Vitest** + **tsx** for tests and the eval harness.
@@ -164,7 +164,7 @@ environment settings: `.env*` is git-ignored.
 | Question | Answer |
 |---|---|
 | **If the LLM is fully compromised, can fraud execute?** | No. Its amount and payee must be grounded in the customer's text and resolve to a saved beneficiary under the limits. Proven by `tests/invariants.test.ts` and the `compromised-norules` eval: 0 unauthorised executions. |
-| **What if the LLM fails, times out or returns garbage?** | Timeout (6 s), errors and schema violations switch to **degraded mode**: a regex parser handles read-only requests, and transfers go to REVIEW. Any exception returns BLOCKED / `SYSTEM_ERROR`. Each case is tested. |
+| **What if the LLM fails, times out or returns garbage?** | Timeout (10 s), errors and schema violations switch to **degraded mode**: a regex parser handles read-only requests, and transfers go to REVIEW. Any exception returns BLOCKED / `SYSTEM_ERROR`. Each case is tested. |
 | **How do you avoid blocking real customers?** | Three outcomes instead of two: medium risk becomes REVIEW (an OTP), not BLOCKED. Rules need context, so "ignore" alone doesn't fire but "ignore … instructions" does. The hard negatives are in the test set: 0% of benign requests are falsely blocked. |
 | **Why not Llama Guard / NeMo Guardrails / Lakera?** | They're classifiers: they output "probably malicious", not "this transfer is authorised". They know nothing about beneficiaries, limits or grounding. Any of them could plug in as one more L2 signal; the policy engine stays the boundary. |
 | **What still gets through?** | See below. |

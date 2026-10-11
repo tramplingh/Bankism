@@ -9,7 +9,7 @@ import path from "node:path";
 import { randomBytes } from "node:crypto";
 import { GoogleGenAI } from "@google/genai";
 
-export const DEFAULT_MODEL = "gemini-2.5-flash";
+export const DEFAULT_MODEL = "gemini-3.8-flash";
 export const modelName = () => process.env.GEMINI_MODEL || DEFAULT_MODEL;
 
 let cachedPrompt: string | null = null;
@@ -67,10 +67,11 @@ export async function geminiParse(text: string, memo: string | null, signal?: Ab
     config: {
       systemInstruction: systemPrompt().replaceAll("{{NONCE}}", nonce),
       temperature: 0,
-      maxOutputTokens: 300,
+      maxOutputTokens: 2048, // thinking tokens count toward this cap on newer models
       responseMimeType: "application/json",
       responseJsonSchema: RESPONSE_SCHEMA,
-      thinkingConfig: { thinkingBudget: 0 },
+      // thinkingBudget is a Gemini 2.5 setting; newer models use their default thinking.
+      ...(modelName().startsWith("gemini-2.5") ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
       abortSignal: signal,
     },
   });

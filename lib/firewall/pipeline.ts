@@ -56,7 +56,7 @@ export async function analyze(input: FirewallInput, options: Partial<AnalyzeOpti
     mode: "live",
     parser: "gemini",
     rules: true,
-    timeoutMs: 6000,
+    timeoutMs: 10000,
     account: sessionAccount,
     ...options,
   };
