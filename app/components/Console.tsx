@@ -5,12 +5,11 @@ import type { Verdict } from "@/lib/types";
 import { PRESETS, type Preset } from "../presets";
 import VerdictView, { announce } from "./VerdictView";
 import { inr } from "./labels";
+import { BENEFICIARIES, LIMITS } from "@/lib/bank/ledger";
 
 interface Health {
   llm: string;
   model: string;
-  limits: { step_up_above: number; per_transfer: number };
-  beneficiaries: string[];
 }
 
 type Mode = "live" | "compromised";
@@ -96,12 +95,12 @@ export default function Console() {
               <span className="bal">{inr(balance)}</span>
             </p>
             <p className="hint">
-              OTP needed above {inr(health?.limits.step_up_above ?? 10_000)} · hard limit {inr(health?.limits.per_transfer ?? 25_000)}
+              OTP needed above {inr(LIMITS.stepUpAbove)} · hard limit {inr(LIMITS.perTransfer)}
             </p>
             <p className="caption">Saved payees</p>
             <ul className="chips">
-              {(health?.beneficiaries ?? ["Rahul Sharma", "Priya Nair", "Amit Verma", "Mom (Lakshmi Rao)", "Sneha Iyer"]).map((b) => (
-                <li key={b} className="chip">{b}</li>
+              {BENEFICIARIES.map((b) => (
+                <li key={b.id} className="chip">{b.name}</li>
               ))}
             </ul>
           </div>

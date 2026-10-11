@@ -26,7 +26,7 @@ export async function GET() {
     model: modelName(),
     limits: { step_up_above: LIMITS.stepUpAbove, per_transfer: LIMITS.perTransfer, max_text: MAX_TEXT, max_memo: MAX_MEMO },
     beneficiaries: BENEFICIARIES.map((b) => b.name),
-  });
+  }, { headers: { "cache-control": "public, max-age=60, s-maxage=60" } });
 }
 
 export async function POST(req: Request) {
