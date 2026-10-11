@@ -22,7 +22,7 @@ eventually fail, and makes sure that failure cannot move money.
    build an approved transfer. It checks an intent allowlist and **grounding**: the amount and payee must
    literally appear in the customer's own words, and the payee must be a saved beneficiary. It also
    enforces step-up OTP above ₹10,000, a hard limit of ₹25,000, and a structural memo policy.
-3. **Risk only goes up.** Deterministic rules (normalization plus 18 fixed-severity signatures) and
+3. **Risk only goes up.** Deterministic rules (normalization plus 19 fixed-severity signatures) and
    the LLM's threat flags can each raise risk. Nothing the LLM says can lower it.
 4. **Fail closed.** A timeout, malformed output or quota error drops to degraded mode, where read-only
    requests still work and transfers never auto-approve. Any exception returns BLOCKED.
@@ -62,7 +62,7 @@ a flattery jailbreak, a paraphrased prompt leak and a polite memo redirect). A t
 catches them, so they show what the LLM layer adds. The same test shows the policy engine still
 refuses to execute them if the LLM misses too.
 
-Engineering evidence: 80 automated tests (84% line coverage), CI on every push, and 0 axe-core
+Engineering evidence: 91 automated tests (84% line coverage), CI on every push, and 0 axe-core
 WCAG 2.1 A/AA violations.
 
 ## Honest limits

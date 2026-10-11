@@ -100,7 +100,7 @@ const OUT = path.join(__dirname, "Bankism.pptx");
   s.addText("Containment over detection: the LLM holds no tools, code holds the keys", { placeholder: "title" });
   const layers = [
     ["L1", "Normalize", "NFKC · invisible chars · homoglyphs · decode views", C.accent4],
-    ["L2", "Rules", "18 signatures · max severity · CRITICAL stops early", C.accent4],
+    ["L2", "Rules", "19 signatures · max severity · CRITICAL stops early", C.accent4],
     ["L3", "Gemini parser", "JSON only · no tools · flags can only raise risk", C.accent3],
     ["L4", "Policy engine", "grounding · saved payees · limits · memo policy", C.accent1],
     ["→", "Executor", "mock ledger · runs only on APPROVED", C.accent1],

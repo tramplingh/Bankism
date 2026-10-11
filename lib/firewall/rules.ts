@@ -77,6 +77,17 @@ export const RULES: Rule[] = [
     description: "invokes a fake privileged mode",
   },
 
+  {
+    // Payment chat never needs markup or SQL. The payload is inert here (React escapes output,
+    // no SQL database, strict CSP), but it should never ride along on an auto-approved transfer.
+    id: "INJ-CODE",
+    category: "PROMPT_INJECTION",
+    severity: "MEDIUM",
+    pattern:
+      /<\s*\/?\s*(?:script|iframe|img|svg|object|embed|style|body|html|form|input|link|meta)\b|\bon(?:error|load|click|mouseover)\s*=|javascript\s*:|['"]\s*;?\s*(?:drop|delete|insert|update|select|union|exec)\b|['"]\s*or\s+['"]?\d+['"]?\s*=\s*['"]?\d+|\b(?:drop|truncate|alter)\s+table\b|\bunion\s+(?:all\s+)?select\b|;\s*--|\bselect\s+[\w*,\s]+?\s+from\s+\w+/,
+    description: "contains HTML/script or SQL syntax",
+  },
+
   // ── Roleplay jailbreaks ──
   {
     id: "RP-PERSONA",

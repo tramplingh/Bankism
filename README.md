@@ -19,7 +19,7 @@ Every number below comes from a committed file you can open without running anyt
 | **Security** | Containment: **0 unauthorised executions** in every configuration, including the LLM replaced by an attacker *and* the rule layer off ([`eval/results/compromised-norules.json`](eval/results/compromised-norules.json)). Fail-closed paths are tested ([`invariants.test.ts`](tests/invariants.test.ts)). HTTP hardening (CSP, frame, sniff, referrer and permissions headers) is in [`next.config.mjs`](next.config.mjs) and tested in [`api.test.ts`](tests/api.test.ts). Full threat model in [SECURITY.md](SECURITY.md). |
 | **Code quality** | Each layer is one small module under [`lib/firewall/`](lib/firewall); [`pipeline.ts`](lib/firewall/pipeline.ts) is an orchestrator over named steps. Strict TypeScript, Zod at every trust boundary, ESLint ([`eslint.config.mjs`](eslint.config.mjs)), and UI split into [`app/components/`](app/components). CI runs lint, typecheck, tests, eval and build ([`ci.yml`](.github/workflows/ci.yml)). |
 | **Efficiency** | 31 of 114 requests (40% of attacks) are stopped by deterministic layers **before any LLM call** (`llm_calls_avoided` in [`eval/results/deterministic.json`](eval/results/deterministic.json)). Identical requests reuse a cached LLM parse ([`cachedParser.ts`](lib/firewall/cachedParser.ts)); a per-client token bucket protects the shared quota ([`rateLimit.ts`](lib/server/rateLimit.ts)); the landing page is static HTML. Deterministic layers take p50 0.1 ms; the full stack with Gemini p50 1.3 s. |
-| **Testing** | **80 tests** (Vitest) across 8 suites, **84% line / 85% branch coverage** ([`docs/reports/coverage-summary.json`](docs/reports/coverage-summary.json)). Tests were written before the detection logic (visible in git history). There is a labelled 114-case dataset with a hash-fixed dev/held-out split ([`eval/dataset.json`](eval/dataset.json)) and six ablation configurations, including two live Gemini runs. |
+| **Testing** | **91 tests** (Vitest) across 9 suites, **84% line / 85% branch coverage** ([`docs/reports/coverage-summary.json`](docs/reports/coverage-summary.json)). Tests were written before the detection logic (visible in git history). There is a labelled 114-case dataset with a hash-fixed dev/held-out split ([`eval/dataset.json`](eval/dataset.json)) and six ablation configurations, including two live Gemini runs. |
 | **Accessibility** | axe-core reports 0 WCAG 2.1 A/AA violations ([`a11y.test.tsx`](tests/a11y.test.tsx)). The verdict is announced in a live region, focus moves to the result, there's a skip link and landmarks, statuses are shown as icon + word (never colour alone), touch targets are 44 px, focus rings are visible, and it supports reduced motion and light/dark themes. |
 
 ## The idea: containment over detection
@@ -35,7 +35,7 @@ eventually fail, and makes sure a failure can't move money:
 ```mermaid
 flowchart LR
   U[Customer text + memo] --> L1[L1 Normalize<br/>NFKC · invisible chars · homoglyphs<br/>scan views: spacing, leet, base64/hex, reversed]
-  L1 --> L2[L2 Rules<br/>18 signatures, max severity<br/>CRITICAL: stop, LLM never called]
+  L1 --> L2[L2 Rules<br/>19 signatures, max severity<br/>CRITICAL: stop, LLM never called]
   L2 --> L3[L3 Gemini parser<br/>no tools · JSON schema · temp 0<br/>nonce-fenced input · flags only raise risk]
   L3 --> L4[L4 Policy engine: THE boundary<br/>intent allowlist · grounding · saved payees<br/>OTP above ₹10k · hard limit ₹25k · memo policy]
   L4 --> V{Verdict JSON}
@@ -136,7 +136,7 @@ It runs without a key too: the LLM layer reports degraded mode, read-only reques
 | Command | What it does |
 |---|---|
 | `npm run verify` | Everything CI runs: lint, typecheck, tests with coverage, offline eval, production build |
-| `npm test` | 80 Vitest tests: normalization, grounding, compromised-LLM invariants, fail-closed, API contract, efficiency, LLM-only scenarios, accessibility |
+| `npm test` | 91 Vitest tests: normalization, grounding, compromised-LLM invariants, fail-closed, API contract, efficiency, LLM-only scenarios, code injection, accessibility |
 | `npm run eval` | Offline ablation evals (no key) → `eval/results/*.json` |
 | `npm run eval:llm` / `eval:llm-norules` | Live Gemini runs (need `GEMINI_API_KEY`); a run with any failed LLM call is refused, not published |
 
@@ -169,7 +169,7 @@ lib/server/             rate limiter and TTL cache
 lib/bank/ledger.ts      mock account, saved beneficiaries, limits, executor
 prompts/                system prompt, few-shot examples, changelog (versioned prompt templates)
 eval/                   dataset builder, 114-case dataset, eval harness, results/*.json
-tests/                  8 Vitest suites (written before the detection logic)
+tests/                  9 Vitest suites (written before the detection logic)
 docs/                   deck (pptx/pdf), jury defence notes, coverage report
 CLAUDE.md               architecture + acceptance tests for AI-assisted development sessions
 ```

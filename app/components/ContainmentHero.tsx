@@ -3,7 +3,7 @@ import type { HeadlineStats } from "@/lib/evalStats";
 
 const LAYERS = [
   { n: "1", name: "Normalize", role: "Undo look-alike letters, hidden characters, encodings", tag: "code", tone: "neutral" },
-  { n: "2", name: "Rules", role: "18 fixed-severity signatures; worst hits stop here", tag: "code", tone: "neutral" },
+  { n: "2", name: "Rules", role: "19 fixed-severity signatures; worst hits stop here", tag: "code", tone: "neutral" },
   { n: "3", name: "Gemini parser", role: "Turns text into JSON. No tools. Can only raise risk", tag: "untrusted", tone: "warn" },
   { n: "4", name: "Policy engine", role: "Amount and payee must be in your words; saved payees; limits", tag: "decides", tone: "ok" },
   { n: "5", name: "Executor", role: "Mock ledger. Runs only on APPROVED", tag: "code", tone: "neutral" },

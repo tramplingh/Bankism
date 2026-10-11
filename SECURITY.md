@@ -24,6 +24,7 @@
 | Internal exception | `analyze()` fails closed → BLOCKED / SYSTEM_ERROR | `tests/invariants.test.ts` |
 | Oversized / malformed requests | 8 KB body cap, 1000-char text, 200-char memo, JSON validation | `tests/api.test.ts` |
 | Quota exhaustion / abuse | Token bucket per IP (429 + Retry-After), bounded memory | `tests/efficiency.test.ts`, `tests/api.test.ts` |
+| Markup / SQL payloads in a request (`<script>`, `'; DROP TABLE`) | L2 `INJ-CODE` (MEDIUM → REVIEW, never auto-approved); text is never executed or rendered unescaped | `tests/code-injection.test.ts` |
 | Clickjacking, MIME sniffing, XSS impact | CSP (`default-src 'self'`, `frame-ancestors 'none'`), X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy; `X-Powered-By` removed | `tests/api.test.ts` |
 | Secret leakage | `.env*` git-ignored; key only in Vercel env; health endpoint exposes status, never the key | `tests/api.test.ts` |
 
