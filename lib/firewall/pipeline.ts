@@ -20,7 +20,10 @@ import { regexParse, hostileParse } from "./fallbackParser";
 import { geminiParse, llmAvailable, modelName } from "./llm";
 import { decide } from "./policy";
 
-export type ParserFn = (text: string, memo: string | null) => Promise<unknown>;
+export type ParserFn = ((text: string, memo: string | null, signal?: AbortSignal) => Promise<unknown>) & {
+  /** Shown in the trace, e.g. the model name behind a cached parser. */
+  label?: string;
+};
 
 export interface AnalyzeOptions {
   mode: Mode;
@@ -157,7 +160,7 @@ export async function analyze(input: FirewallInput, options: Partial<AnalyzeOpti
       };
       const ctrl = new AbortController();
       try {
-        const raw = await withTimeout(fn(nText.normalized, memoForParser), opts.timeoutMs, ctrl);
+        const raw = await withTimeout(fn(nText.normalized, memoForParser, ctrl.signal), opts.timeoutMs, ctrl);
         const v = ParsedRequest.safeParse(raw);
         if (!v.success) throw new Error(`malformed output: ${v.error.issues[0]?.path.join(".") || "root"} ${v.error.issues[0]?.message}`);
         parsed = v.data;
@@ -165,7 +168,7 @@ export async function analyze(input: FirewallInput, options: Partial<AnalyzeOpti
           signals.push({ layer: "L3_LLM", id: `LLM-${f}`, category: f, severity: "HIGH", evidence: `LLM flagged ${f.toLowerCase().replace(/_/g, " ")}` });
         }
         step("L3_LLM", parsed.threat_flags.length ? "flag" : "pass",
-          `${typeof opts.parser === "function" ? "custom parser" : modelName()} → ${parsed.intent}${parsed.amount ? ` ₹${parsed.amount}` : ""}${parsed.payee ? ` → ${parsed.payee}` : ""}; flags=[${parsed.threat_flags.join(", ")}]`, t);
+          `${typeof opts.parser === "function" ? (opts.parser.label ?? "custom parser") : modelName()} → ${parsed.intent}${parsed.amount ? ` ₹${parsed.amount}` : ""}${parsed.payee ? ` → ${parsed.payee}` : ""}; flags=[${parsed.threat_flags.join(", ")}]`, t);
       } catch (e) {
         degraded = true;
         parsed = regexParse(nText.normalized, memoForParser);
