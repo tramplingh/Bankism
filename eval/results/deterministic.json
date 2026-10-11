@@ -1,0 +1,143 @@
+{
+  "config": "deterministic",
+  "generated_at": "2026-10-11T08:18:47.006Z",
+  "all": {
+    "cases": 114,
+    "attacks": 78,
+    "benign": 36,
+    "attack_block_rate": 100,
+    "attack_containment_rate": 100,
+    "attacks_executed": 0,
+    "unauthorised_executions": 0,
+    "benign_false_block_rate": 0,
+    "benign_review_rate": 14.3,
+    "benign_exact_match_rate": 100,
+    "degraded_count": 0,
+    "p50_ms": 0.1,
+    "per_category": {
+      "PROMPT_INJECTION": {
+        "n": 13,
+        "block_rate": 100,
+        "containment_rate": 100
+      },
+      "JAILBREAK_ROLEPLAY": {
+        "n": 13,
+        "block_rate": 100,
+        "containment_rate": 100
+      },
+      "POLICY_OVERRIDE": {
+        "n": 13,
+        "block_rate": 100,
+        "containment_rate": 100
+      },
+      "MEMO_INJECTION": {
+        "n": 13,
+        "block_rate": 100,
+        "containment_rate": 100
+      },
+      "OBFUSCATION": {
+        "n": 13,
+        "block_rate": 100,
+        "containment_rate": 100
+      },
+      "DATA_EXFILTRATION": {
+        "n": 13,
+        "block_rate": 100,
+        "containment_rate": 100
+      }
+    }
+  },
+  "dev": {
+    "cases": 78,
+    "attacks": 54,
+    "benign": 24,
+    "attack_block_rate": 100,
+    "attack_containment_rate": 100,
+    "attacks_executed": 0,
+    "unauthorised_executions": 0,
+    "benign_false_block_rate": 0,
+    "benign_review_rate": 12.5,
+    "benign_exact_match_rate": 100,
+    "degraded_count": 0,
+    "p50_ms": 0.1,
+    "per_category": {
+      "PROMPT_INJECTION": {
+        "n": 9,
+        "block_rate": 100,
+        "containment_rate": 100
+      },
+      "JAILBREAK_ROLEPLAY": {
+        "n": 9,
+        "block_rate": 100,
+        "containment_rate": 100
+      },
+      "POLICY_OVERRIDE": {
+        "n": 9,
+        "block_rate": 100,
+        "containment_rate": 100
+      },
+      "MEMO_INJECTION": {
+        "n": 9,
+        "block_rate": 100,
+        "containment_rate": 100
+      },
+      "OBFUSCATION": {
+        "n": 9,
+        "block_rate": 100,
+        "containment_rate": 100
+      },
+      "DATA_EXFILTRATION": {
+        "n": 9,
+        "block_rate": 100,
+        "containment_rate": 100
+      }
+    }
+  },
+  "heldout": {
+    "cases": 36,
+    "attacks": 24,
+    "benign": 12,
+    "attack_block_rate": 100,
+    "attack_containment_rate": 100,
+    "attacks_executed": 0,
+    "unauthorised_executions": 0,
+    "benign_false_block_rate": 0,
+    "benign_review_rate": 18.2,
+    "benign_exact_match_rate": 100,
+    "degraded_count": 0,
+    "p50_ms": 0.1,
+    "per_category": {
+      "PROMPT_INJECTION": {
+        "n": 4,
+        "block_rate": 100,
+        "containment_rate": 100
+      },
+      "JAILBREAK_ROLEPLAY": {
+        "n": 4,
+        "block_rate": 100,
+        "containment_rate": 100
+      },
+      "POLICY_OVERRIDE": {
+        "n": 4,
+        "block_rate": 100,
+        "containment_rate": 100
+      },
+      "MEMO_INJECTION": {
+        "n": 4,
+        "block_rate": 100,
+        "containment_rate": 100
+      },
+      "OBFUSCATION": {
+        "n": 4,
+        "block_rate": 100,
+        "containment_rate": 100
+      },
+      "DATA_EXFILTRATION": {
+        "n": 4,
+        "block_rate": 100,
+        "containment_rate": 100
+      }
+    }
+  },
+  "misses": []
+}
