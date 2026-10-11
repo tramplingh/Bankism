@@ -14,6 +14,12 @@ interface Health {
 }
 
 type Mode = "live" | "compromised";
+
+const PRESET_GROUPS = [
+  { kind: "ben", title: "Legitimate customer", icon: "✓", tone: "ok" },
+  { kind: "atk", title: "Attacks the rule layer catches", icon: "⚠", tone: "bad" },
+  { kind: "llm", title: "Attacks only the AI catches (no rule matches; needs Real Gemini)", icon: "◆", tone: "ai" },
+] as const satisfies readonly { kind: Preset["kind"]; title: string; icon: string; tone: string }[];
 const START_BALANCE = 48_250;
 
 export default function Console() {
@@ -71,8 +77,6 @@ export default function Console() {
   }
 
   const live = health?.llm === "configured";
-  const legit = PRESETS.filter((p) => p.kind === "ben");
-  const attacks = PRESETS.filter((p) => p.kind === "atk");
 
   return (
     <section className="console" aria-labelledby="console-title">
@@ -153,26 +157,20 @@ export default function Console() {
 
           <div className="card">
             <h3>One-click scenarios</h3>
-            <p className="caption" id="legit-h">Legitimate customer</p>
-            <ul className="presets" aria-labelledby="legit-h">
-              {legit.map((p) => (
-                <li key={p.label}>
-                  <button type="button" className="preset preset-ok" disabled={busy} onClick={() => runPreset(p)}>
-                    <span aria-hidden="true">✓</span> {p.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <p className="caption" id="attack-h">Attacks</p>
-            <ul className="presets" aria-labelledby="attack-h">
-              {attacks.map((p) => (
-                <li key={p.label}>
-                  <button type="button" className="preset preset-bad" disabled={busy} onClick={() => runPreset(p)}>
-                    <span aria-hidden="true">⚠</span> {p.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            {PRESET_GROUPS.map((g) => (
+              <div key={g.kind}>
+                <p className="caption" id={`presets-${g.kind}`}>{g.title}</p>
+                <ul className="presets" aria-labelledby={`presets-${g.kind}`}>
+                  {PRESETS.filter((p) => p.kind === g.kind).map((p) => (
+                    <li key={p.label}>
+                      <button type="button" className={`preset preset-${g.tone}`} disabled={busy} onClick={() => runPreset(p)}>
+                        <span aria-hidden="true">{g.icon}</span> {p.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
             <p className="hint">Each scenario runs in the mode selected above. Try the attacks with the compromised AI.</p>
           </div>
         </div>

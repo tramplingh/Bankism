@@ -150,6 +150,7 @@ textarea, input[type="text"] { width: 100%; background: var(--panel); color: var
 .preset:hover:not(:disabled) { border-color: var(--accent); }
 .preset-ok span[aria-hidden] { color: var(--ok); font-weight: 800; }
 .preset-bad span[aria-hidden] { color: var(--bad); font-weight: 800; }
+.preset-ai span[aria-hidden] { color: var(--accent); font-weight: 800; }
 .preset:disabled { opacity: .6; cursor: wait; }
 
 /* Verdict */
