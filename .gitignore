@@ -16,3 +16,6 @@ next-env.d.ts
 .DS_Store
 .vercel
 npm-debug.log*
+
+# failed live eval runs (LLM unreachable) — never publish
+eval/results/live.degraded.json
