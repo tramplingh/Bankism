@@ -13,7 +13,8 @@
     "eval:llm-norules": "tsx eval/run.ts live-norules",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "verify": "npm run lint && npm run typecheck && npm run test:coverage && npm run eval && npm run build"
   },
   "dependencies": {
     "@google/genai": "1.28.0",
