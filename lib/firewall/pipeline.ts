@@ -70,7 +70,7 @@ export async function analyze(input: FirewallInput, options: Partial<AnalyzeOpti
   let normalization: Verdict["normalization"] = { normalized: "", changed: false, notes: [] };
   let parsed: ParsedRequest | null = null;
   let degraded = false;
-  let signals: Signal[] = [];
+  const signals: Signal[] = [];
 
   type Core = Pick<Verdict, "decision" | "risk_level" | "threat_category" | "rationale" | "execution" | "grounding">;
   const finish = (v: Core): Verdict => ({
