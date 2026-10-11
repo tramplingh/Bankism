@@ -12,6 +12,7 @@ import dataset from "./dataset.json";
 import { analyze, type AnalyzeOptions } from "../lib/firewall/pipeline";
 import { createAccount, resolveBeneficiary, LIMITS } from "../lib/bank/ledger";
 import { regexParse } from "../lib/firewall/fallbackParser";
+import { modelName } from "../lib/firewall/llm";
 
 type Case = { id: string; text: string; memo?: string; label: string; category: string; expected: string; split: string; note?: string };
 const cases = dataset as Case[];
@@ -25,6 +26,9 @@ const CONFIGS: Record<string, Partial<AnalyzeOptions> | "none"> = {
 };
 
 const config = process.argv[2] ?? "deterministic";
+const LIVE_DELAY_MS = Number(process.env.EVAL_DELAY_MS ?? 4_500); // 15 RPM free tier → one call per 4 s, plus margin
+const MAX_RETRIES = 4;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 if (!(config in CONFIGS)) {
   console.error(`unknown config ${config}; one of ${Object.keys(CONFIGS).join(", ")}`);
   process.exit(1);
@@ -46,6 +50,7 @@ interface Row {
   unauthorised: boolean;
   degraded: boolean;
   llm_error?: string;
+  llm_called: boolean;
   ms: number;
 }
 
@@ -58,9 +63,20 @@ async function runCase(c: Case): Promise<Row> {
     const p = regexParse(c.text, c.memo ?? null);
     const executed = p.intent === "p2p_transfer" && p.amount !== null && p.payee !== null;
     const unauthorised = executed && (c.label === "attack" || !resolveBeneficiary(p.payee!) || p.amount! > LIMITS.perTransfer);
-    return { ...base, decision: executed ? "APPROVED" : "N/A", threat_category: "NONE", executed, unauthorised, degraded: false, ms: performance.now() - t0 };
+    return { ...base, decision: executed ? "APPROVED" : "N/A", threat_category: "NONE", executed, unauthorised, degraded: false, llm_called: false, ms: performance.now() - t0 };
   }
-  const v = await analyze({ text: c.text, memo: c.memo }, { ...cfg, account: createAccount() });
+  let v = await analyze({ text: c.text, memo: c.memo }, { ...cfg, account: createAccount() });
+  // Live only: a rate limit / overload / timeout is an infrastructure failure, not a model answer.
+  // Retry it (honouring the API's suggested delay) so it is not scored as the model's output.
+  for (let attempt = 1; config === "live" && v.degraded && attempt <= MAX_RETRIES; attempt++) {
+    const err = v.trace.find((t) => t.layer === "L3_LLM")?.detail ?? "";
+    if (!/\b(429|503)\b|RESOURCE_EXHAUSTED|UNAVAILABLE|timed out/.test(err)) break;
+    const hinted = Number(err.match(/retry in ([\d.]+)s/)?.[1]);
+    const waitMs = Number.isFinite(hinted) ? (hinted + 2) * 1000 : 15_000 * attempt;
+    console.log(`   ${c.id}: transient LLM error, retry ${attempt}/${MAX_RETRIES} in ${Math.round(waitMs / 1000)}s`);
+    await sleep(waitMs);
+    v = await analyze({ text: c.text, memo: c.memo }, { ...cfg, account: createAccount() });
+  }
   const p = v.parsed_action;
   const unauthorised =
     v.execution.executed &&
@@ -73,6 +89,7 @@ async function runCase(c: Case): Promise<Row> {
     executed: v.execution.executed,
     unauthorised,
     degraded: v.degraded,
+    llm_called: v.trace.some((t) => t.layer === "L3_LLM" && t.status !== "skipped"),
     llm_error: v.degraded ? v.trace.find((t) => t.layer === "L3_LLM")?.detail : undefined,
     ms: v.latency_ms,
   };
@@ -115,10 +132,16 @@ async function main() {
   const rows: Row[] = [];
   for (const c of cases) {
     rows.push(await runCase(c));
-    if (config === "live") await new Promise((r) => setTimeout(r, 250)); // be polite to the API
+    const row = rows[rows.length - 1];
+    if (config === "live") {
+      console.log(`  ${rows.length}/${cases.length} ${row.id} ${row.decision}${row.degraded ? " (DEGRADED)" : ""}`);
+      // Free tier allows ~5 requests/min; pace only cases that actually called the LLM.
+      if (row.llm_called) await sleep(LIVE_DELAY_MS);
+    }
   }
   const result = {
     config,
+    model: config === "live" ? modelName() : null,
     generated_at: new Date().toISOString(),
     all: summarise(rows),
     dev: summarise(rows.filter((r) => r.split === "dev")),

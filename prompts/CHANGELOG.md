@@ -3,6 +3,11 @@
 Prompts are versioned like code. Any change must be followed by `npm run eval:llm` and the
 numbers recorded here.
 
+## parser v1.0.2 — model change
+- Default model moved from `gemini-3.8-flash` to `gemini-3.5-flash-lite`. The free tier for 3.8-flash
+  allows only 5 requests/min, which degraded the live demo and the eval under load; 3.5-flash-lite
+  allows 15/min and 500/day. Prompt and schema unchanged.
+
 ## parser v1.0.1 — model change
 - Default model moved from `gemini-2.5-flash` (retired for new API keys: 404) to `gemini-3.8-flash`.
   Prompt and schema unchanged. `thinkingBudget: 0` is now sent only to 2.5 models; LLM timeout

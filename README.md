@@ -154,7 +154,7 @@ Import the repo in Vercel (it detects Next.js automatically), add the environmen
 environment settings: `.env*` is git-ignored.
 
 ## Models, APIs and frameworks
-- **Google Gemini** (`gemini-3.8-flash` by default; override with `GEMINI_MODEL`) via `@google/genai`, using JSON-schema structured output at temperature 0.
+- **Google Gemini** (`gemini-3.5-flash-lite` by default, chosen for its free-tier headroom of 15 requests/min and 500/day; override with `GEMINI_MODEL`) via `@google/genai`, using JSON-schema structured output at temperature 0.
 - **Next.js 15** (App Router) + **TypeScript** on **Vercel**. One repository, one deployment.
 - **Zod** for runtime validation of everything the LLM returns.
 - **Vitest** + **tsx** for tests and the eval harness.

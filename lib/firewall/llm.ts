@@ -9,7 +9,7 @@ import path from "node:path";
 import { randomBytes } from "node:crypto";
 import { GoogleGenAI } from "@google/genai";
 
-export const DEFAULT_MODEL = "gemini-3.8-flash";
+export const DEFAULT_MODEL = "gemini-3.5-flash-lite";
 export const modelName = () => process.env.GEMINI_MODEL || DEFAULT_MODEL;
 
 let cachedPrompt: string | null = null;
