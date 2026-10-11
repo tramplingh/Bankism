@@ -20,6 +20,12 @@ describe("amount extraction (used for grounding)", () => {
     expect(values("transfer 9000 to acct 1029384756")).toEqual([9000]);
   });
 
+  it("never grounds a negative amount (a jury edge case: 'Send -500')", () => {
+    expect(values("Send -500 to Rahul")).toEqual([]);
+    expect(values("Send ₹-500 to Rahul")).toEqual([]);
+    expect(values("send minus 500 to rahul")).toEqual([]);
+  });
+
   it("ignores single digits like counts", () => {
     expect(values("Show my last 5 transactions")).toEqual([]);
   });

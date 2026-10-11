@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import Link from "next/link";
+import SiteHeader from "../components/SiteHeader";
 
 export const dynamic = "force-static";
 
@@ -56,16 +56,11 @@ export default function EvalPage() {
   const results = load();
   const det = results.find((r) => r.config === "deterministic") ?? results.find((r) => r.config === "live");
   return (
-    <main className="wrap">
-      <header className="top">
-        <div className="brand">
-          <h1>📊 Bankism eval</h1>
-          <p>114 labelled requests · 36 benign (incl. hard negatives) · 78 attacks in 6 categories</p>
-        </div>
-        <nav className="nav">
-          <Link className="pill" href="/">← Firewall console</Link>
-        </nav>
-      </header>
+    <>
+    <SiteHeader />
+    <main id="main" className="wrap">
+      <h1 className="page-title">Evaluation results</h1>
+      <p className="note">114 labelled requests · 36 benign (incl. hard negatives) · 78 attacks in 6 categories</p>
 
       <div className="card">
         <h2>Headline: unauthorised executions</h2>
@@ -145,5 +140,6 @@ export default function EvalPage() {
       </div>
       <p className="note">Generated {results[0]?.generated_at ?? "—"}</p>
     </main>
+    </>
   );
 }

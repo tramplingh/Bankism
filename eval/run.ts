@@ -123,6 +123,9 @@ function summarise(rows: Row[]) {
     benign_review_rate: pct(benignPass.filter((r) => r.decision === "REVIEW").length, benignPass.length),
     benign_exact_match_rate: pct(benign.filter((r) => r.decision === r.expected).length, benign.length),
     degraded_count: rows.filter((r) => r.degraded).length,
+    // Requests stopped by deterministic layers before any LLM call (cost and latency saved).
+    llm_calls: rows.filter((r) => r.llm_called).length,
+    llm_calls_avoided: rows.filter((r) => !r.llm_called).length,
     p50_ms: lat.length ? Math.round(lat[Math.floor(lat.length / 2)] * 10) / 10 : null,
     per_category: Object.fromEntries(
       Object.entries(perCategory).map(([k, v]) => [k, { n: v.n, block_rate: pct(v.blocked, v.n), containment_rate: pct(v.contained, v.n) }]),
