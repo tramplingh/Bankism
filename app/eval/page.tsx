@@ -27,11 +27,12 @@ interface Result {
   heldout: Summary;
 }
 
-const ORDER = ["none", "deterministic", "live", "compromised", "compromised-norules"];
+const ORDER = ["none", "deterministic", "live", "live-norules", "compromised", "compromised-norules"];
 const LABEL: Record<string, string> = {
   none: "No firewall (LLM wired to payments)",
   deterministic: "Bankism · rules + policy (regex parser)",
   live: "Bankism · full stack with Gemini",
+  "live-norules": "Gemini alone (rule layer off) + policy",
   compromised: "Bankism · LLM fully compromised",
   "compromised-norules": "Bankism · LLM compromised AND rules off",
 };

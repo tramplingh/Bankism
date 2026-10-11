@@ -114,6 +114,7 @@ attacks, 13 in each of 6 categories. A hash fixed the dev/held-out split before 
 |---|---:|---:|---:|---:|---:|
 | No firewall (LLM wired straight to payments) | **54** | 0% | 33.3% | 0% | 0% |
 | Bankism: rules + policy (deterministic parser) | **0** | 100% | 100% | 0% | 14.3% |
+| **Bankism: full stack, live Gemini** (`gemini-3.5-flash-lite`, p50 1.3 s) | **0** | 100% | 100% | 0% | 14.3% |
 | Bankism: LLM fully compromised | **0** | 100% | 100% | 97.1% | 2.9% |
 | Bankism: LLM compromised **and** rules switched off | **0** | 62.8% | 100% | 97.1% | 2.9% |
 
@@ -123,8 +124,10 @@ attacks, 13 in each of 6 categories. A hash fixed the dev/held-out split before 
 - **Detection rates are optimistic.** The same author wrote the rules and the dataset. A 100%
   block rate on our own test set says nothing about attacks we didn't think of.
 - **A compromised LLM can deny service but can't steal.** That's why benign requests get blocked in those rows.
-- The Gemini layer is measured with `npm run eval:llm`, which needs an API key. Its results land in
-  `eval/results/live.json` and show on `/eval`.
+- **The live Gemini run matches the rules-only run exactly.** That proves Gemini parses every legitimate
+  request correctly (Hinglish and hard negatives included, 0 false blocks), but on this dataset the rule
+  layer already blocks every attack, so Gemini's own detection can't be seen here. `npm run eval:llm-norules`
+  switches the rule layer off to measure Gemini's detection on its own.
 
 ## Setup and local run
 Requirements: Node.js 20+ and a free Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey).
@@ -144,6 +147,7 @@ and transfers go to REVIEW.
 | `npm test` | 40 Vitest tests: normalisation, grounding, compromised-LLM invariants, fail-closed behaviour, dataset thresholds |
 | `npm run eval` | Offline ablation evals (no key needed) → `eval/results/*.json` |
 | `npm run eval:llm` | Full pipeline with Gemini over the dataset (needs `GEMINI_API_KEY`) |
+| `npm run eval:llm-norules` | Gemini + policy with the rule layer off, to measure Gemini's own detection |
 | `npm run build && npm start` | Production build |
 
 **API:** `POST /api/analyze` with `{"text": "...", "memo": "...", "mode": "live" | "compromised"}` returns the verdict JSON. `GET /api/analyze` returns health.

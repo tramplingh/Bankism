@@ -23,9 +23,11 @@ const CONFIGS: Record<string, Partial<AnalyzeOptions> | "none"> = {
   compromised: { parser: "hostile", mode: "compromised" },
   "compromised-norules": { parser: "hostile", mode: "compromised", rules: false },
   live: { parser: "gemini" },
+  "live-norules": { parser: "gemini", rules: false }, // Gemini's own detection, without the rule layer
 };
 
 const config = process.argv[2] ?? "deterministic";
+const LIVE = config.startsWith("live");
 const LIVE_DELAY_MS = Number(process.env.EVAL_DELAY_MS ?? 4_500); // 15 RPM free tier → one call per 4 s, plus margin
 const MAX_RETRIES = 4;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -33,7 +35,7 @@ if (!(config in CONFIGS)) {
   console.error(`unknown config ${config}; one of ${Object.keys(CONFIGS).join(", ")}`);
   process.exit(1);
 }
-if (config === "live" && !process.env.GEMINI_API_KEY) {
+if (LIVE && !process.env.GEMINI_API_KEY) {
   console.error("live eval needs GEMINI_API_KEY in the environment");
   process.exit(1);
 }
@@ -68,7 +70,7 @@ async function runCase(c: Case): Promise<Row> {
   let v = await analyze({ text: c.text, memo: c.memo }, { ...cfg, account: createAccount() });
   // Live only: a rate limit / overload / timeout is an infrastructure failure, not a model answer.
   // Retry it (honouring the API's suggested delay) so it is not scored as the model's output.
-  for (let attempt = 1; config === "live" && v.degraded && attempt <= MAX_RETRIES; attempt++) {
+  for (let attempt = 1; LIVE && v.degraded && attempt <= MAX_RETRIES; attempt++) {
     const err = v.trace.find((t) => t.layer === "L3_LLM")?.detail ?? "";
     if (!/\b(429|503)\b|RESOURCE_EXHAUSTED|UNAVAILABLE|timed out/.test(err)) break;
     const hinted = Number(err.match(/retry in ([\d.]+)s/)?.[1]);
@@ -133,7 +135,7 @@ async function main() {
   for (const c of cases) {
     rows.push(await runCase(c));
     const row = rows[rows.length - 1];
-    if (config === "live") {
+    if (LIVE) {
       console.log(`  ${rows.length}/${cases.length} ${row.id} ${row.decision}${row.degraded ? " (DEGRADED)" : ""}`);
       // Free tier allows ~5 requests/min; pace only cases that actually called the LLM.
       if (row.llm_called) await sleep(LIVE_DELAY_MS);
@@ -141,7 +143,7 @@ async function main() {
   }
   const result = {
     config,
-    model: config === "live" ? modelName() : null,
+    model: LIVE ? modelName() : null,
     generated_at: new Date().toISOString(),
     all: summarise(rows),
     dev: summarise(rows.filter((r) => r.split === "dev")),
@@ -153,13 +155,13 @@ async function main() {
   mkdirSync(new URL("./results/", import.meta.url), { recursive: true });
   // A live run where Gemini failed measures the regex fallback, not the LLM. Never publish it as live.
   const degraded = rows.filter((r) => r.degraded);
-  const outName = config === "live" && degraded.length ? "live.degraded" : config;
+  const outName = LIVE && degraded.length ? `${config}.degraded` : config;
   writeFileSync(new URL(`./results/${outName}.json`, import.meta.url), JSON.stringify(result, null, 2) + "\n");
   if (degraded.length) {
     console.error(`\n⚠ ${degraded.length}/${rows.length} cases ran in DEGRADED mode (LLM call failed). Distinct errors:`);
     for (const e of [...new Set(degraded.map((r) => r.llm_error))].slice(0, 5)) console.error(`   ${e}`);
-    if (config === "live") {
-      console.error(`   Results saved to eval/results/live.degraded.json — NOT live.json. Fix the error and re-run.`);
+    if (LIVE) {
+      console.error(`   Results saved to eval/results/${outName}.json — NOT ${config}.json. Fix the error and re-run.`);
       process.exitCode = 1;
     }
   }

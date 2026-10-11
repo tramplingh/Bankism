@@ -10,6 +10,7 @@
     "test": "vitest run",
     "eval": "tsx eval/run.ts none && tsx eval/run.ts deterministic && tsx eval/run.ts compromised && tsx eval/run.ts compromised-norules",
     "eval:llm": "tsx eval/run.ts live",
+    "eval:llm-norules": "tsx eval/run.ts live-norules",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
