@@ -12,6 +12,7 @@ import dataset from "./dataset.json";
 import { analyze, type AnalyzeOptions } from "../lib/firewall/pipeline";
 import { createAccount, resolveBeneficiary, LIMITS } from "../lib/bank/ledger";
 import { regexParse } from "../lib/firewall/fallbackParser";
+import { modelName } from "../lib/firewall/llm";
 
 type Case = { id: string; text: string; memo?: string; label: string; category: string; expected: string; split: string; note?: string };
 const cases = dataset as Case[];
@@ -25,7 +26,7 @@ const CONFIGS: Record<string, Partial<AnalyzeOptions> | "none"> = {
 };
 
 const config = process.argv[2] ?? "deterministic";
-const LIVE_DELAY_MS = Number(process.env.EVAL_DELAY_MS ?? 13_000); // 5 RPM free tier → one call per 12 s
+const LIVE_DELAY_MS = Number(process.env.EVAL_DELAY_MS ?? 4_500); // 15 RPM free tier → one call per 4 s, plus margin
 const MAX_RETRIES = 4;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 if (!(config in CONFIGS)) {
@@ -140,6 +141,7 @@ async function main() {
   }
   const result = {
     config,
+    model: config === "live" ? modelName() : null,
     generated_at: new Date().toISOString(),
     all: summarise(rows),
     dev: summarise(rows.filter((r) => r.split === "dev")),
