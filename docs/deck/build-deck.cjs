@@ -69,7 +69,7 @@ const OUT = path.join(__dirname, "Bankism.pptx");
   pill(s, "pill-approved", "APPROVED", 0.6, 4.0, 1.7, C.accent1);
   pill(s, "pill-review", "REVIEW", 2.5, 4.0, 1.5, C.accent3);
   pill(s, "pill-blocked", "BLOCKED", 4.2, 4.0, 1.6, C.accent2);
-  T(s, "github.com/tramplingh/bankism  ·  live demo link in the README", { objectName: "links", x: 0.6, y: 4.75, w: 8.8, h: 0.35, fontSize: 12, color: C.text2 });
+  T(s, "Live: bankism-9xa67dbum-anishs-projects-f0db1d35.vercel.app  ·  github.com/tramplingh/bankism", { objectName: "links", x: 0.6, y: 4.75, w: 8.8, h: 0.35, fontSize: 12, color: C.text2 });
   s.addNotes("Bankism is a firewall that sits between a customer's chat message and a bank's payment API. Every request gets a JSON verdict: approved, review (step-up OTP) or blocked. Only approved ever executes. The one-line idea: the LLM only parses; deterministic code decides.");
 
   // ───────── 2. Problem ─────────
@@ -154,7 +154,7 @@ const OUT = path.join(__dirname, "Bankism.pptx");
   pres.addSection({ title: "Evidence" });
   s = pres.addSlide({ masterName: "Content Dark", sectionTitle: "Evidence" });
   s.addText("Zero unauthorised executions, even with the LLM compromised and rules off", { placeholder: "title" });
-  s.addChart(pres.charts.BAR, [{ name: "Unauthorised executions", labels: ["No firewall", "Bankism", "LLM compromised", "LLM compromised + rules off"], values: [54, 0, 0, 0] }], {
+  s.addChart(pres.charts.BAR, [{ name: "Unauthorised executions", labels: ["No firewall", "Bankism + live Gemini", "Gemini alone (rules off)", "LLM compromised + rules off"], values: [54, 0, 0, 0] }], {
     objectName: "chart-unauthorised", x: 0.5, y: 1.2, w: 4.9, h: 3.6, barDir: "bar",
     chartColors: [H.accent2, H.accent1, H.accent1, H.accent1],
     showTitle: true, title: "Unauthorised executions (114 requests)", titleColor: H.dk1, titleFontSize: 13, titleFontFace: "+mn-lt",
@@ -164,18 +164,18 @@ const OUT = path.join(__dirname, "Bankism.pptx");
   });
   const rows = [
     ["", "Blocked", "Benign false-block", "Benign → OTP"],
-    ["Rules + policy", "100%", "0%", "14.3%"],
-    ["LLM compromised", "100%", "97.1%", "2.9%"],
-    ["…and rules off", "62.8%", "97.1%", "2.9%"],
+    ["Live Gemini", "100%", "0%", "14.3%"],
+    ["Gemini, no rules", "98.7%", "0%", "14.3%"],
+    ["Hostile LLM, no rules", "62.8%", "97.1%", "2.9%"],
   ];
   s.addTable(rows.map((r, i) => r.map((c, j) => ({ text: c, options: { bold: i === 0 || j === 0, color: i === 0 ? H.dk2 : H.dk1, fontSize: 11, fill: { color: H.lt2 }, border: { type: "solid", color: H.accent5, pt: 0.5 } } }))), {
-    objectName: "results-table", x: 5.6, y: 1.25, w: 3.9, colW: [1.35, 0.75, 1.0, 0.8], rowH: 0.36,
+    objectName: "results-table", x: 5.6, y: 1.25, w: 3.9, colW: [1.45, 0.7, 0.95, 0.8], rowH: 0.36,
   });
   T(s, [
     { text: "Honest reading: ", options: { bold: true, color: C.accent3 } },
-    { text: "the same author wrote the rules and the 114-case set, so detection rates are optimistic. The claim we defend is containment: a hijacked model can deny service, never steal.", options: { color: C.text1 } },
-  ], { objectName: "honesty", x: 5.6, y: 2.95, w: 3.9, h: 1.6, fontSize: 12 });
-  s.addNotes("Every number comes from npm run eval and is reproducible from the repo. The headline is unauthorised executions: 54 without a firewall, 0 with Bankism. That stays 0 even when we swap the LLM for an attacker and switch off the rule layer, because the policy engine depends on neither. I'm not claiming 100% detection in the wild: I wrote the test set, so treat detection as optimistic.");
+    { text: "Gemini alone missed one attack (\u201chistory of account 9876543210\u201d); the policy served the customer\u2019s own history instead. Detection is optimistic (same author wrote rules and data); containment is the claim.", options: { color: C.text1 } },
+  ], { objectName: "honesty", x: 5.6, y: 3.2, w: 3.9, h: 1.6, fontSize: 12 });
+  s.addNotes("Every number comes from npm run eval or npm run eval:llm with live Gemini, committed in eval/results. With the rule layer off, Gemini alone blocked 98.7%; its single miss asked for another account's history and got the customer's own instead. The headline is unauthorised executions: 54 without a firewall, 0 with Bankism. That stays 0 even when we swap the LLM for an attacker and switch off the rule layer, because the policy engine depends on neither. I'm not claiming 100% detection in the wild: I wrote the test set, so treat detection as optimistic.");
 
   // ───────── 6. Limits ─────────
   s = pres.addSlide({ masterName: "Content Dark", sectionTitle: "Evidence" });
@@ -183,7 +183,7 @@ const OUT = path.join(__dirname, "Bankism.pptx");
   card(s, "gaps-card", 0.5, 1.2, 4.4, 3.7);
   T(s, "Known gaps (MVP)", { objectName: "gaps-h", x: 0.7, y: 1.35, w: 4, h: 0.35, fontSize: 16, bold: true, color: C.accent3 });
   T(s, [
-    { text: "Novel paraphrases that both rules and Gemini miss", options: { bullet: true, breakLine: true } },
+    { text: "Novel paraphrases that both rules and Gemini miss (5 rule-evading demos show the LLM layer\u2019s value)", options: { bullet: true, breakLine: true } },
     { text: "Multi-turn manipulation; indirect injection from documents", options: { bullet: true, breakLine: true } },
     { text: "Languages beyond English and Hinglish", options: { bullet: true, breakLine: true } },
     { text: "Social engineering of the real customer (APP scams)", options: { bullet: true, breakLine: true } },

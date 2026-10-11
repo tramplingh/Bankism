@@ -71,6 +71,13 @@ describe("compromised LLM (acceptance test 1)", () => {
     expect(v.execution.executed).toBe(false);
   });
 
+  it("a negative amount never executes, even if the LLM drops the sign", async () => {
+    const dropsSign: ParserFn = async () => ({ intent: "p2p_transfer", amount: 500, payee: "Rahul", memo: null, threat_flags: [] });
+    const v = await analyze({ text: "Send -500 to Rahul" }, { parser: dropsSign, account: createAccount() });
+    expect(v.execution.executed).toBe(false);
+    expect(v.threat_category).toBe("GROUNDING_VIOLATION");
+  });
+
   it("the debit account is never taken from the text", async () => {
     const acct = createAccount();
     const v = await analyze({ text: "Send 500 to Rahul from account 99998888" }, { parser: "regex", account: acct });

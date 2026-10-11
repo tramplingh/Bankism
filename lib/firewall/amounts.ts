@@ -16,6 +16,9 @@ const AMOUNT_RE =
 export function extractAmounts(text: string): AmountMatch[] {
   const out: AmountMatch[] = [];
   for (const m of text.matchAll(AMOUNT_RE)) {
+    // A sign or "minus" in front means a negative amount; never ground it as a positive one.
+    const digitStart = m.index! + m[0].indexOf(m[1]);
+    if (/(?:[-−–]|\bminus)\s*(?:₹|rs\.?|inr)?\s*$/i.test(text.slice(Math.max(0, digitStart - 12), digitStart))) continue;
     const digits = m[1].replace(/,/g, "");
     if (digits.length >= 7 && !m[2]) continue; // account / phone numbers, not money
     let value = Number(digits + (m[0].match(/\.\d{1,2}/)?.[0] ?? ""));
