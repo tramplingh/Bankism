@@ -39,8 +39,27 @@ export const CASES = [
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const cell = (s) => String(s).replace(/\|/g, "\\|").replace(/\n/g, " ");
 
+const asText = (x) => (x == null ? "" : typeof x === "string" ? x : JSON.stringify(x));
+
 async function main() {
-  const health = await fetch(`${base}/api/analyze`).then((r) => r.json()).catch((e) => ({ error: String(e) }));
+  // Preflight: a protected Vercel URL answers with 401/403 or an HTML login page, not our API.
+  const probe = await fetch(`${base}/api/analyze`);
+  const probeBody = await probe.text();
+  let health;
+  try {
+    health = JSON.parse(probeBody);
+  } catch {
+    health = null;
+  }
+  if (!probe.ok || !health || typeof health.llm !== "string") {
+    console.error(`\n${base}/api/analyze did not answer like Bankism (HTTP ${probe.status}).`);
+    console.error(`First 300 characters of the response:\n${probeBody.slice(0, 300)}\n`);
+    if (probe.status === 401 || probe.status === 403 || /vercel|authenticat|sso/i.test(probeBody)) {
+      console.error("This looks like Vercel Deployment Protection: the URL needs a Vercel login, so judges cannot open it either.");
+      console.error("Use the project's production domain (Vercel > Project > Domains) or disable protection for production.");
+    }
+    process.exit(1);
+  }
   const rows = [];
   for (const [group, text, memo, mode] of CASES) {
     const res = await fetch(`${base}/api/analyze`, {
@@ -52,10 +71,10 @@ async function main() {
     const row = {
       group,
       input: (text.length > 70 ? `${text.slice(0, 67)}…` : text) + (memo ? ` [memo: ${memo}]` : "") + (mode ? ` (${mode})` : ""),
-      decision: res.ok ? v.decision : `HTTP ${res.status}`,
-      threat: v.threat_category ?? v.error ?? "",
+      decision: asText(res.ok ? v.decision : `HTTP ${res.status}`),
+      threat: asText(v.threat_category ?? v.error ?? ""),
       executed: v.execution?.executed ? "yes" : "no",
-      llm: v.degraded ? "DEGRADED" : (v.trace?.find((t) => t.layer === "L3_LLM")?.status ?? ""),
+      llm: asText(v.degraded ? "DEGRADED" : (v.trace?.find((t) => t.layer === "L3_LLM")?.status ?? "")),
     };
     rows.push(row);
     console.log(`${row.decision.padEnd(9)} ${row.threat.padEnd(22)} exec=${row.executed} llm=${row.llm.padEnd(8)} ${row.input}`);
@@ -64,7 +83,7 @@ async function main() {
   const md = [
     `# Edge-case run against ${base}`,
     "",
-    `Run at ${new Date().toISOString()} · LLM: ${health.llm ?? health.error} · model: ${health.model ?? "?"}`,
+    `Run at ${new Date().toISOString()} · LLM: ${health.llm} · model: ${health.model ?? "?"}`,
     "",
     "| Group | Input | Decision | Threat | Executed | LLM step |",
     "|---|---|---|---|---|---|",
