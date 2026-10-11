@@ -45,6 +45,7 @@ interface Row {
   executed: boolean;
   unauthorised: boolean;
   degraded: boolean;
+  llm_error?: string;
   ms: number;
 }
 
@@ -72,6 +73,7 @@ async function runCase(c: Case): Promise<Row> {
     executed: v.execution.executed,
     unauthorised,
     degraded: v.degraded,
+    llm_error: v.degraded ? v.trace.find((t) => t.layer === "L3_LLM")?.detail : undefined,
     ms: v.latency_ms,
   };
 }
@@ -126,7 +128,18 @@ async function main() {
       .map((r) => ({ id: r.id, split: r.split, expected: r.expected, got: r.decision, category: r.category, text: cases.find((c) => c.id === r.id)!.text })),
   };
   mkdirSync(new URL("./results/", import.meta.url), { recursive: true });
-  writeFileSync(new URL(`./results/${config}.json`, import.meta.url), JSON.stringify(result, null, 2) + "\n");
+  // A live run where Gemini failed measures the regex fallback, not the LLM. Never publish it as live.
+  const degraded = rows.filter((r) => r.degraded);
+  const outName = config === "live" && degraded.length ? "live.degraded" : config;
+  writeFileSync(new URL(`./results/${outName}.json`, import.meta.url), JSON.stringify(result, null, 2) + "\n");
+  if (degraded.length) {
+    console.error(`\n⚠ ${degraded.length}/${rows.length} cases ran in DEGRADED mode (LLM call failed). Distinct errors:`);
+    for (const e of [...new Set(degraded.map((r) => r.llm_error))].slice(0, 5)) console.error(`   ${e}`);
+    if (config === "live") {
+      console.error(`   Results saved to eval/results/live.degraded.json — NOT live.json. Fix the error and re-run.`);
+      process.exitCode = 1;
+    }
+  }
 
   const s = (x: ReturnType<typeof summarise>) =>
     `block ${x.attack_block_rate}% · contained ${x.attack_containment_rate}% · unauthorised exec ${x.unauthorised_executions} · benign false-block ${x.benign_false_block_rate}% · benign review ${x.benign_review_rate}% · p50 ${x.p50_ms}ms`;

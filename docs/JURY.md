@@ -40,7 +40,7 @@ Weights would be arbitrary numbers I couldn't justify. Max-severity is monotonic
 CRITICAL signal is enough, and adding benign context can't dilute it.
 
 **Q: What happens when Gemini is down, slow or returns garbage?**
-6-second timeout. A schema violation, error or timeout switches to degraded mode: the regex parser keeps
+10-second timeout. A schema violation, error or timeout switches to degraded mode: the regex parser keeps
 balance/history working, and transfers go to REVIEW. Any exception returns BLOCKED / SYSTEM_ERROR. *Show:* the
 "LLM key missing · degraded mode" badge if it happens live, and the failure tests.
 
