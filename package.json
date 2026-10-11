@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest run",
-    "eval": "tsx eval/run.ts deterministic && tsx eval/run.ts compromised && tsx eval/run.ts compromised-norules",
+    "eval": "tsx eval/run.ts none && tsx eval/run.ts deterministic && tsx eval/run.ts compromised && tsx eval/run.ts compromised-norules",
     "eval:llm": "tsx eval/run.ts live",
     "typecheck": "tsc --noEmit"
   },
