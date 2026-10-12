@@ -1,4 +1,4 @@
-# Bankism: a Blue-Team AI Firewall for LLM Banking
+# Bankism: a Blue-Team AI Firewall for LLM Banking.
 
 [![CI](https://github.com/tramplingh/bankism/actions/workflows/ci.yml/badge.svg)](https://github.com/tramplingh/bankism/actions/workflows/ci.yml)
 
