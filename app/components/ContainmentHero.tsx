@@ -62,6 +62,20 @@ export default function ContainmentHero({ stats }: { stats: HeadlineStats }) {
         </div>
       </dl>
 
+      <div className="eval-cta">
+        <p>
+          Tested on {stats.cases} requests, {stats.attacks} of them attacks:{" "}
+          {stats.liveUnauthorised === 0 && stats.compromisedUnauthorised === 0 ? (
+            <strong>no unauthorised transfer, even with the AI replaced by an attacker.</strong>
+          ) : (
+            <strong>see where money moved wrongly and why.</strong>
+          )}
+        </p>
+        <Link className="btn" href="/eval">
+          See the evaluation <span aria-hidden="true">→</span>
+        </Link>
+      </div>
+
       <figure className="pipeline" aria-labelledby="pipeline-caption">
         <ol>
           {LAYERS.map((l) => (

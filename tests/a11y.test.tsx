@@ -12,6 +12,7 @@ import axe from "axe-core";
 import Console from "@/app/components/Console";
 import ContainmentHero from "@/app/components/ContainmentHero";
 import { headlineStats } from "@/lib/evalStats";
+import EvalPage from "@/app/eval/page";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -22,8 +23,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-async function mount(ui: React.ReactNode) {
-  const host = document.createElement("main");
+async function mount(ui: React.ReactNode, tag = "main") {
+  const host = document.createElement(tag);
   document.body.appendChild(host);
   root = createRoot(host);
   await act(async () => root!.render(ui));
@@ -57,6 +58,24 @@ describe("accessibility", () => {
   it("containment hero has no axe violations", async () => {
     await mount(<ContainmentHero stats={headlineStats()} />);
     expect(await axeViolations()).toEqual([]);
+  });
+
+  it("hero links to the evaluation with a clear, named button", async () => {
+    const host = await mount(<ContainmentHero stats={headlineStats()} />);
+    const cta = host.querySelector<HTMLAnchorElement>(".eval-cta a");
+    expect(cta?.getAttribute("href")).toBe("/eval");
+    expect(cta?.textContent).toContain("See the evaluation");
+    expect(host.querySelector(".eval-cta")?.textContent).toContain("no unauthorised transfer");
+  });
+
+  it("eval page charts have no axe violations and print every value as text", async () => {
+    const host = await mount(<EvalPage />, "div");
+    expect(await axeViolations()).toEqual([]);
+    expect(host.querySelector(".eval-lede")?.textContent).toMatch(/54 of 114 .* 0 in every configuration/);
+    // Every bar has a printed value, so no reading depends on colour or hover.
+    const bars = host.querySelectorAll(".bar-track");
+    expect(bars.length).toBeGreaterThan(0);
+    bars.forEach((b) => expect(b.querySelector(".bar-value")?.textContent).toBeTruthy());
   });
 
   it("console has no axe violations before and after a verdict", async () => {
