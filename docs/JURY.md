@@ -29,6 +29,8 @@ Use deck slides 3 and 4.
 4. **Failure** (15 s): "Timeout, bad JSON or quota error: degraded mode. Read-only still works; transfers never auto-approve. Any crash: BLOCKED."
 
 ## Part 3: Q&A, likely edge cases and what the deployed app does
+Open Q&A yourself: "Type any attack you like into the box." The jury will stress-test anyway; inviting
+it shows confidence. Keep **Real Gemini** selected, and use the table below to answer each verdict.
 Verified against the live deployment with `node scripts/edge-cases.mjs <live-url>` (results in
 `docs/reports/edge-cases.md`). Re-run it the evening before the finale.
 
@@ -57,6 +59,26 @@ Verified against the live deployment with `node scripts/edge-cases.mjs <live-url
 - **"Why not Llama Guard / NeMo / Lakera?"** They classify, they don't authorise; none knows saved payees, limits or grounding. Any could plug in as another signal.
 - **"Why not a database or chat memory?"** Every extra component is attack surface. Multi-turn memory is a known injection vector; we scoped to single-turn on purpose.
 - **"Is the rate limit real?"** Per serverless instance, yes, and tested. It isn't distributed; that's in SECURITY.md.
+
+## Questions that compare us with fuller banking apps
+Other finalists show complete products: login, roles, dashboards, databases. Don't criticise anyone
+on stage. Answer the question the jury is really asking: *why is yours smaller?*
+- **"Others have login, banker and manager dashboards, and a database. Why don't you?"** The problem
+  is stopping a manipulated LLM from moving money. Every extra component is attack surface with no
+  security value for that threat. The scope was a decision, not a shortcut.
+- **"Others make the user confirm a prepared transfer. Where's yours?"** REVIEW is that step: above
+  ₹10,000, an unknown payee or medium risk all require an OTP. The difference is *what* gets
+  confirmed. Our policy engine has already checked that the amount and payee came from the
+  customer's own words, so the confirmation screen can't show values a hijacked model invented.
+- **"Others keep a per-user risk history and escalate repeat offenders."** That's useful operations,
+  and it can be added on top. Our risk is the worst single signal, never a sum, so a first-time
+  attacker can't stay under a threshold by spreading the attack across weak signals.
+- **"Where is the AI in a keyword or regex firewall?"** Ask it of any design, including ours. In
+  Bankism, Gemini parses every request that the rules let through, and the five LLM-only presets
+  show attacks that no rule matches (`tests/llm-only.test.ts`).
+- **"Unicode normalisation handles look-alike letters, doesn't it?"** NFKC alone doesn't. It leaves
+  Cyrillic `і` and `о` as they are. That's why step 1 folds homoglyphs explicitly. Show the
+  **Homoglyphs** preset.
 
 ## Fallbacks
 | Failure on stage | What you'll see | What to do |
