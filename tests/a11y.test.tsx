@@ -108,7 +108,7 @@ describe("accessibility", () => {
     const bubbles = host.querySelectorAll(".chat .bubble");
     expect(bubbles[bubbles.length - 1].textContent).toMatch(/can't do that.*Instructions hidden in memo/);
     expect(host.querySelector(".compare .pane-bad")?.textContent).toMatch(/account 9999888877.*not a saved payee/);
-    expect(host.querySelector(".compare .pane-saved")?.textContent).toMatch(/Nothing executed/);
+    expect(host.querySelector(".compare .verdict")?.textContent).toMatch(/BLOCKED.*Nothing executed.*attack was stopped/);
     expect(host.querySelectorAll(".stepper .node")).toHaveLength(5);
     expect(host.querySelectorAll(".audit tbody tr")).toHaveLength(1);
     expect(host.querySelector(".audit-totals .ok")?.textContent).toMatch(/0\s*Unauthorised transfers|Unauthorised transfers\s*0/);
@@ -127,6 +127,18 @@ describe("accessibility", () => {
     expect(host.querySelector(".bubble-customer")?.textContent).toMatch(/AI: Compromised/);
     const replies = host.querySelectorAll(".bubble-assistant");
     expect(replies[replies.length - 1].textContent).toMatch(/Gemini unavailable/);
+  });
+
+  it("groups scenarios in keyboard-operable tabs, one group visible at a time", async () => {
+    stubFetch();
+    const host = await mount(<Console />);
+    const tabs = [...host.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    expect(tabs.map((t) => t.getAttribute("aria-selected"))).toEqual(["true", "false", "false"]);
+    expect(host.querySelectorAll('[role="tabpanel"]:not([hidden])')).toHaveLength(1);
+    await act(async () => tabs[0].dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true })));
+    expect(host.querySelector('[role="tab"][aria-selected="true"]')?.id).toBe("tab-atk");
+    expect(host.querySelector<HTMLElement>("#panel-atk")?.hidden).toBe(false);
+    expect(await axeViolations()).toEqual([]);
   });
 
   it("exposes the AI mode as a labelled radio group and statuses as words, not colour", async () => {

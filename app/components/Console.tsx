@@ -31,10 +31,11 @@ interface ChatMessage {
 }
 
 const PRESET_GROUPS = [
-  { kind: "ben", title: "Legitimate customer", icon: "✓", tone: "ok" },
-  { kind: "atk", title: "Attacks the rule layer catches", icon: "⚠", tone: "bad" },
-  { kind: "llm", title: "Attacks only the AI catches (no rule matches; needs Real Gemini)", icon: "◆", tone: "ai" },
-] as const satisfies readonly { kind: Preset["kind"]; title: string; icon: string; tone: string }[];
+  { kind: "ben", title: "Legitimate", icon: "✓", tone: "ok", note: "Ordinary customers, including ones that look suspicious but aren't." },
+  { kind: "atk", title: "Caught by rules", icon: "⚠", tone: "bad", note: "Known attack patterns. Stopped before the AI sees them." },
+  { kind: "llm", title: "Caught by the AI", icon: "◆", tone: "ai", note: "No rule matches these. Gemini flags them, so use Real Gemini." },
+] as const satisfies readonly { kind: Preset["kind"]; title: string; icon: string; tone: string; note: string }[];
+const TAB_ORDER = PRESET_GROUPS.map((g) => g.kind);
 
 const START = createAccount();
 const GREETING: ChatMessage = {
@@ -59,6 +60,7 @@ export default function Console() {
   const [chat, setChat] = useState<ChatMessage[]>([GREETING]);
   const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [status, setStatus] = useState("");
+  const [tab, setTab] = useState<Preset["kind"]>("ben");
   const resultHeading = useRef<HTMLHeadingElement>(null);
   const chatBox = useRef<HTMLOListElement>(null);
 
@@ -117,6 +119,15 @@ export default function Console() {
     }
   }
 
+  // Arrow keys move between tabs (WAI-ARIA tabs pattern).
+  function onTabKey(e: React.KeyboardEvent) {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    const i = TAB_ORDER.indexOf(tab);
+    const next = TAB_ORDER[(i + (e.key === "ArrowRight" ? 1 : TAB_ORDER.length - 1)) % TAB_ORDER.length];
+    setTab(next);
+    document.getElementById(`tab-${next}`)?.focus();
+  }
+
   function runPreset(p: Preset) {
     setText(p.text);
     setMemo(p.memo ?? "");
@@ -136,24 +147,41 @@ export default function Console() {
       </div>
 
       <div className="card scenarios">
-        <h3>One-click scenarios</h3>
-        <div className="scenario-groups">
+        <div className="scenarios-head">
+          <h3 id="scenarios-title">One-click scenarios</h3>
+          <p className="hint">Runs with the AI selected in the app below.</p>
+        </div>
+        <div className="tabs" role="tablist" aria-labelledby="scenarios-title" onKeyDown={onTabKey}>
           {PRESET_GROUPS.map((g) => (
-            <div key={g.kind}>
-              <p className="caption" id={`presets-${g.kind}`}>{g.title}</p>
-              <ul className="presets" aria-labelledby={`presets-${g.kind}`}>
-                {PRESETS.filter((p) => p.kind === g.kind).map((p) => (
-                  <li key={p.label}>
-                    <button type="button" className={`preset preset-${g.tone}`} disabled={busy} onClick={() => runPreset(p)}>
-                      <span aria-hidden="true">{g.icon}</span> {p.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <button
+              key={g.kind}
+              type="button"
+              role="tab"
+              id={`tab-${g.kind}`}
+              aria-selected={tab === g.kind}
+              aria-controls={`panel-${g.kind}`}
+              tabIndex={tab === g.kind ? 0 : -1}
+              className={`tab tab-${g.tone}`}
+              onClick={() => setTab(g.kind)}
+            >
+              <span aria-hidden="true">{g.icon}</span> {g.title}
+            </button>
           ))}
         </div>
-        <p className="hint">Each scenario runs with the AI selected below. Try the attacks again with the compromised AI.</p>
+        {PRESET_GROUPS.map((g) => (
+          <div key={g.kind} role="tabpanel" id={`panel-${g.kind}`} aria-labelledby={`tab-${g.kind}`} hidden={tab !== g.kind}>
+            <p className="hint tab-note">{g.note}</p>
+            <ul className="presets">
+              {PRESETS.filter((p) => p.kind === g.kind).map((p) => (
+                <li key={p.label}>
+                  <button type="button" className={`preset preset-${g.tone}`} disabled={busy} onClick={() => runPreset(p)}>
+                    <span aria-hidden="true">{g.icon}</span> {p.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
 
       <div className="grid">

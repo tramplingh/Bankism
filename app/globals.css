@@ -328,3 +328,65 @@ td.num { font-family: var(--mono); }
 .bubble-mode { font-size: 12px; font-weight: 700; opacity: .9; }
 .bubble-mode-compromised { align-self: flex-start; background: var(--bad-bg); color: var(--bad); padding: 1px 8px; border-radius: 999px; opacity: 1; }
 .bubble-note { font-size: 13px; color: var(--warn); font-weight: 600; }
+
+/* Breathing room: one idea per band, generous gaps, fewer competing borders. */
+body { line-height: 1.6; }
+.wrap { max-width: 1180px; padding: 0 20px; }
+@media (max-width: 480px) { .wrap { padding: 0 16px; } }
+.hero { padding: 56px 0 24px; }
+.hero h1 { margin: 10px 0 16px; }
+.lede { margin-bottom: 32px; }
+.stats { gap: 16px; margin-bottom: 28px; }
+.stat { padding: 20px; }
+.eval-cta { margin-bottom: 40px; padding: 18px 22px; }
+.pipeline ol { gap: 14px; }
+.layer { padding: 16px; }
+.pipeline figcaption { margin-top: 14px; }
+
+.console { padding: 56px 0 72px; border-top: 1px solid var(--border); margin-top: 40px; }
+.console-head h2 { font-size: 28px; }
+.console .scenarios { margin: 24px 0 0; }
+.card { padding: 22px; margin-bottom: 20px; }
+.grid { gap: 32px; margin-top: 32px; }
+.scenarios-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
+.scenarios-head h3, .scenarios-head .hint { margin: 0; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin: 14px 0 16px; overflow-x: auto; }
+.tab { min-height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; margin-bottom: -1px; background: none; color: var(--muted); font-weight: 700; cursor: pointer; white-space: nowrap; }
+.tab:hover { color: var(--text); }
+.tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+.tab-ok span[aria-hidden] { color: var(--ok); } .tab-bad span[aria-hidden] { color: var(--bad); } .tab-ai span[aria-hidden] { color: var(--accent); }
+.tab-note { margin: 0 0 14px; }
+.presets { gap: 10px; }
+
+.phone { padding: 0 20px 20px; }
+.app-bar { margin: 0 -20px 18px; padding: 14px 20px; }
+.acct-card { padding: 20px; }
+.payees { margin: 4px 0 18px; gap: 16px; }
+.chat { padding: 14px; gap: 10px; }
+.composer label:first-child { margin-top: 18px; }
+.mode { margin-top: 18px; }
+.go { margin-top: 18px; }
+
+.result > h2 { margin-bottom: 18px; }
+.compare { gap: 16px; margin-bottom: 24px; align-items: stretch; }
+.pane, .verdict { padding: 18px 20px; }
+.verdict .badge { margin: 4px 0 8px; font-size: 24px; }
+.verdict .rationale { margin: 0 0 6px; font-size: 16px; }
+.verdict .facts { margin-top: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.stepper { gap: 10px; margin-bottom: 28px; }
+.details-stack h3 { margin: 28px 0 12px; }
+.details-stack h3:first-child { margin-top: 0; }
+.evidence { margin-top: 24px; }
+.evidence .signals { margin-bottom: 12px; }
+
+.audit { margin-top: 48px; padding: 24px; }
+.audit-totals { gap: 12px; margin: 20px 0; }
+.verdict.verdict-stopped { border-color: var(--ok); }
+/* Verdict facts as one quiet line instead of four boxes. */
+.verdict .facts { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+.verdict .facts div { background: none; padding: 0; display: flex; gap: 6px; align-items: baseline; }
+.verdict .facts dd { font-size: 14px; }
+.node { padding: 10px 8px; align-items: center; text-align: center; }
+.node-name { font-size: 13px; }
+@media (max-width: 640px) { .node { flex-direction: row; text-align: left; gap: 10px; } .node-status { margin-left: auto; } }
+@media (max-width: 640px) { .tabs { flex-wrap: wrap; overflow-x: visible; } }

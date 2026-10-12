@@ -4,9 +4,9 @@ import { STATUS_LABEL } from "./labels";
 const STEPS: { layer: Layer; name: string }[] = [
   { layer: "L1_NORMALIZE", name: "Normalize" },
   { layer: "L2_RULES", name: "Rules" },
-  { layer: "L3_LLM", name: "Gemini parser" },
-  { layer: "L4_POLICY", name: "Policy engine" },
-  { layer: "EXECUTOR", name: "Executor" },
+  { layer: "L3_LLM", name: "AI parser" },
+  { layer: "L4_POLICY", name: "Policy" },
+  { layer: "EXECUTOR", name: "Execute" },
 ];
 
 const RANK: Record<TraceStep["status"], number> = { skipped: 0, pass: 1, flag: 2, block: 3, error: 3 };
@@ -24,7 +24,7 @@ export default function Stepper({ v }: { v: Verdict }) {
         return (
           <li key={s.layer} className={`node node-${status}`} style={{ animationDelay: `${i * 140}ms` }}>
             <span className="node-dot" aria-hidden="true">{STATUS_LABEL[status].icon}</span>
-            <span className="node-name">{i + 1} · {s.name}</span>
+            <span className="node-name"><span className="sr-only">Step {i + 1}: </span>{s.name}</span>
             <span className="node-status">{STATUS_LABEL[status].text}</span>
           </li>
         );
