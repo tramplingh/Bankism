@@ -47,7 +47,7 @@ export default function ContainmentHero({ stats }: { stats: HeadlineStats }) {
         <div className="stat">
           <dt>
             Attacks blocked by Gemini alone (rules off)
-            <span className="stat-note">the one miss was still contained</span>
+            <span className="stat-note">its one miss leaked nothing and moved no money</span>
           </dt>
           <dd>
             <span className="stat-big">{stats.llmAloneBlockRate ?? "n/a"}%</span>

@@ -56,7 +56,7 @@ Verified against the live deployment with `node scripts/edge-cases.mjs <live-url
 ## Hard questions (short answers)
 - **"Is the 'without a firewall' box real?"** It's a labelled simulation of an obedient assistant wired to payments (`lib/demo/unprotected.ts`, tested in `tests/demo.test.ts`). It never affects a verdict. The measured no-firewall baseline is the eval's 54.
 - **"Who writes the assistant's replies?"** Code, from the verdict (`app/components/assistantReply.ts`). The LLM never writes anything the customer sees.
-- **"Isn't 100% detection overfitting?"** Yes, the rules and data share an author; the README says so. The claim we defend is containment, which is zero unauthorised executions even with the LLM hijacked and rules off. Gemini alone measured 98.7%; its one miss was contained.
+- **"Isn't 100% detection overfitting?"** Yes, the rules and data share an author; the README says so. The claim we defend is containment, which is zero unauthorised executions even with the LLM hijacked and rules off. Gemini alone measured 98.7%; its one miss (A107) read the customer's own history: nothing leaked, no money moved.
 - **"What does the LLM add if rules catch everything?"** Paraphrases and other languages: the five LLM-only scenarios provably evade every rule (`tests/llm-only.test.ts`).
 - **"Why not Llama Guard / NeMo / Lakera?"** They classify, they don't authorise; none knows saved payees, limits or grounding. Any could plug in as another signal.
 - **"Why not a database or chat memory?"** Every extra component is attack surface. Multi-turn memory is a known injection vector; we scoped to single-turn on purpose.
