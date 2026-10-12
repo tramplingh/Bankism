@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ThemeToggle from "./ThemeToggle";
 
 export default function SiteHeader() {
   return (
@@ -14,6 +15,7 @@ export default function SiteHeader() {
             <li><a href="https://github.com/tramplingh/bankism">Source on GitHub</a></li>
           </ul>
         </nav>
+        <ThemeToggle />
       </div>
     </header>
   );

@@ -37,8 +37,11 @@
   --card-a: #1d4ed8;
   --card-b: #0f766e;
 }
+/* Dark theme: follows the OS unless the visitor picked a theme with the header toggle
+   (data-theme on <html>, set before first paint by the script in layout.tsx). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --bg: #0c0f16;
     --panel: #141823;
     --panel-2: #1b2030;
@@ -62,6 +65,31 @@
     --card-b: #134e4a;
   }
 }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0c0f16;
+  --panel: #141823;
+  --panel-2: #1b2030;
+  --border: #2b3244;
+  --text: #eceef3;
+  --muted: #a6adbd;
+  --accent: #9db4ff;
+  --accent-text: #07101f;
+  --ok: #5fe0a8;
+  --ok-bg: #0f2e22;
+  --warn: #ffc966;
+  --warn-bg: #33270e;
+  --bad: #ff8a92;
+  --bad-bg: #3a1418;
+  --focus: #ffd166;
+  --mark: #5b4a10;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 8px 28px rgba(0, 0, 0, .25);
+  --s1: #3987e5;
+  --s2: #d95926;
+  --card-a: #1e3a8a;
+  --card-b: #134e4a;
+}
+:root[data-theme="light"] { color-scheme: light; }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
@@ -464,3 +492,9 @@ textarea:focus-visible, input[type="text"]:focus-visible { border-color: var(--a
 .audit-totals dd { font-size: 32px; }
 .tab[aria-selected="true"] { border-bottom-width: 2px; }
 @media (max-width: 640px) { .site-header { position: static; } }
+.site-header-inner nav { margin-left: auto; }
+.theme-toggle { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-weight: 600; font-size: 14px; cursor: pointer; }
+.theme-toggle:hover { background: var(--panel-2); }
+.theme-toggle span[aria-hidden] { font-size: 16px; line-height: 1; }
+@media (max-width: 480px) { .theme-toggle-text { display: none; } .theme-toggle { padding: 0 12px; } }
+@media (max-width: 640px) { .site-header-inner nav { order: 3; width: 100%; margin-left: 0; } .theme-toggle { margin-left: auto; } }

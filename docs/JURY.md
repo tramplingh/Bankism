@@ -95,4 +95,4 @@ on stage. Answer the question the jury is really asking: *why is yours smaller?*
 | Gemini down or quota hit | Pill says *degraded mode*; transfers show REVIEW | Say: "This is the fail-closed path live. The LLM is down, so no transfer auto-approves." Then switch to **Compromised AI**, which doesn't use Gemini at all and runs the full containment demo. |
 | Rate limited (HTTP 429) | "Too many requests" message | Wait the seconds shown; meanwhile open `/eval`, which is static. |
 | Live site unreachable | Browser error | Present from `docs/deck/Bankism.pdf` (slides 3–6), then run `npm run dev` locally if a laptop with the repo is available; it works without a key. |
-| Projector too dark | Low contrast | The site follows the OS theme: switch the OS to light mode. |
+| Projector washes out or is too dark | Low contrast | Use the **Light / Dark** button in the header. The choice is remembered on that laptop. |
