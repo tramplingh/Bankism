@@ -94,10 +94,10 @@ const LIVE_URL = "bankism-ten.vercel.app";
     T(s, b, { objectName: `attack-b-${i}`, x: 0.78, y: y + 0.3, w: 5.3, h: 0.45, fontSize: 11, color: H.accent6, italic: true });
   });
   card(s, "stat-card", 6.45, 1.3, 3.05, 3.35);
-  T(s, "54", { objectName: "stat-num", x: 6.7, y: 1.5, w: 2.6, h: 1.0, fontSize: 60, bold: true, color: C.accent2, fontFace: THEME.headFontFace });
-  T(s, "of 114 test requests execute a wrong-payee or over-limit transfer when an LLM is wired straight to the payment API", { objectName: "stat-label", x: 6.7, y: 2.6, w: 2.6, h: 1.5, fontSize: 13, color: C.text1 });
+  T(s, "56", { objectName: "stat-num", x: 6.7, y: 1.5, w: 2.6, h: 1.0, fontSize: 60, bold: true, color: C.accent2, fontFace: THEME.headFontFace });
+  T(s, "of 114 test requests move money wrongly (attacker-caused, unsaved payee, or over ₹10,000 without OTP) when an LLM is wired straight to the payment API", { objectName: "stat-label", x: 6.7, y: 2.6, w: 2.6, h: 1.5, fontSize: 13, color: C.text1 });
   source(s, "Source: eval/results/none.json (114 labelled requests: 36 legitimate, 78 attacks in 6 categories)");
-  s.addNotes("Banks want customers to say 'send 500 to Rahul' in chat. The moment the model behind that chat can call a payment API, every jailbreak trick becomes a fraud vector. These are the four attack families from the problem statement. Without a firewall, 54 of our 114 test requests move money they shouldn't.");
+  s.addNotes("Banks want customers to say 'send 500 to Rahul' in chat. The moment the model behind that chat can call a payment API, every jailbreak trick becomes a fraud vector. These are the four attack families from the problem statement. Without a firewall, 56 of our 114 test requests move money they shouldn't.");
 
   // ── 3. Approach ──────────────────────────────────────────
   pres.addSection({ title: "Solution" });
@@ -170,7 +170,7 @@ const LIVE_URL = "bankism-ten.vercel.app";
   s = pres.addSlide({ masterName: "Content Light", sectionTitle: "Evidence" });
   kicker(s, "Measured results");
   s.addText("Zero unauthorised transfers in every configuration, including a hijacked LLM", { placeholder: "title" });
-  s.addChart(pres.charts.BAR, [{ name: "Unauthorised executions", labels: ["No firewall", "Bankism, live Gemini", "Gemini alone, rules off", "Hijacked LLM, rules off"], values: [54, 0, 0, 0] }], {
+  s.addChart(pres.charts.BAR, [{ name: "Unauthorised executions", labels: ["No firewall", "Bankism, live Gemini", "Gemini alone, rules off", "Hijacked LLM, rules off"], values: [56, 0, 0, 0] }], {
     objectName: "chart-unauthorised", x: 0.5, y: 1.25, w: 4.4, h: 3.5, barDir: "bar", catAxisOrientation: "maxMin",
     chartColors: [H.accent2, H.accent1, H.accent1, H.accent1],
     showTitle: true, title: "Unauthorised executions (114 requests)", titleColor: H.dk1, titleFontSize: 12, titleFontFace: "+mn-lt",
@@ -194,7 +194,7 @@ const LIVE_URL = "bankism-ten.vercel.app";
     { text: "With rules off, Gemini missed one attack (“transaction history of account 9876543210”). The policy engine served the signed-in customer’s own history instead. A hijacked model can deny service, never steal.", options: { color: C.text1 } },
   ], { objectName: "callout-text", x: 5.42, y: 2.97, w: 3.95, h: 1.1, fontSize: 11.5 });
   source(s, "Source: eval/results/{none, live, live-norules, compromised-norules}.json · live model gemini-3.5-flash-lite · same author wrote rules and dataset, so detection rates are optimistic");
-  s.addNotes("Every number is committed in eval/results and reproducible. 54 unauthorised executions without a firewall; zero with Bankism in every configuration, including the LLM replaced by an attacker and the rule layer switched off. Gemini alone blocks 98.7 percent; its single miss asked for another account's history and got the customer's own. We don't claim 100 percent detection in the wild; we claim containment.");
+  s.addNotes("Every number is committed in eval/results and reproducible. 56 unauthorised executions without a firewall; zero with Bankism in every configuration, including the LLM replaced by an attacker and the rule layer switched off. Gemini alone blocks 98.7 percent; its single miss asked for another account's history and got the customer's own. We don't claim 100 percent detection in the wild; we claim containment.");
 
   // ── 6. Live edge cases ───────────────────────────────────
   s = pres.addSlide({ masterName: "Content Light", sectionTitle: "Evidence" });
@@ -262,9 +262,9 @@ const LIVE_URL = "bankism-ten.vercel.app";
     T(s, b, { objectName: `impact-b-${i}`, x, y: 2.42, w: 2.75, h: 0.8, fontSize: 11, color: "C9D3E3" });
   });
   s.addShape(pres.shapes.RECTANGLE, { objectName: "quality-strip", x: 0.6, y: 3.45, w: 8.8, h: 0.62, fill: { color: "16263D" }, line: { color: "16263D" } });
-  T(s, "106 automated tests  ·  94% line coverage  ·  CI on every push  ·  0 axe-core accessibility violations  ·  31 of 78 attacks stopped before any LLM call", { objectName: "quality-text", x: 0.8, y: 3.45, w: 8.4, h: 0.62, fontSize: 11, color: "E6EDF7", valign: "middle" });
+  T(s, "109 automated tests  ·  94% line coverage  ·  CI on every push  ·  0 axe-core accessibility violations  ·  31 of 78 attacks stopped before any LLM call", { objectName: "quality-text", x: 0.8, y: 3.45, w: 8.4, h: 0.62, fontSize: 11, color: "E6EDF7", valign: "middle" });
   T(s, `Try it: ${LIVE_URL}  ·  github.com/tramplingh/bankism`, { objectName: "cta", x: 0.6, y: 4.45, w: 8.8, h: 0.35, fontSize: 12, bold: true, color: "7FD1C7" });
-  s.addNotes("Any bank or fintech can drop this in front of an LLM assistant without trusting the model. It keeps friction low (OTP instead of block) and leaves an audit trail. Engineering evidence: 106 tests, 94 percent line coverage, CI on every push, zero automated accessibility violations. Next steps: a blind red-team set, multi-turn support, and learned classifiers as extra signals while the policy engine stays the boundary.");
+  s.addNotes("Any bank or fintech can drop this in front of an LLM assistant without trusting the model. It keeps friction low (OTP instead of block) and leaves an audit trail. Engineering evidence: 109 tests, 94 percent line coverage, CI on every push, zero automated accessibility violations. Next steps: a blind red-team set, multi-turn support, and learned classifiers as extra signals while the policy engine stays the boundary.");
 
   await pres.writeFile({ fileName: OUT });
   if (process.argv[2]) await require(process.argv[2]).applyTheme(OUT, THEME);

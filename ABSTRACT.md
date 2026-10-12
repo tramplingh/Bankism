@@ -11,7 +11,7 @@ output can trigger a transfer, prompt injection becomes a fraud vector:
 - instructions hidden in payment memos;
 - token obfuscation (homoglyphs, zero-width characters, leetspeak, base64).
 
-In our 114-request test set, an LLM wired straight to the payment API would have executed **54**
+In our 114-request test set, an LLM wired straight to the payment API would have executed **56**
 requests it shouldn't have.
 
 ## Strategy: containment over detection
@@ -48,7 +48,7 @@ explicit hard negatives and Hinglish examples to limit false positives. The temp
 ## What the prototype demonstrates (measured, reproducible: `npm run eval`, `npm run eval:llm`)
 | Configuration | Unauthorized executions | Attacks blocked | Benign falsely blocked |
 |---|---:|---:|---:|
-| No firewall | 54 | 0% | 0% |
+| No firewall | 56 | 0% | 0% |
 | Full stack, live Gemini (`gemini-3.5-flash-lite`) | **0** | 100% | 0% |
 | Gemini alone, rule layer off | **0** | 98.7% | 0% |
 | LLM fully compromised, rule layer off | **0** | 62.8% | 97.1% |
@@ -62,7 +62,7 @@ a flattery jailbreak, a paraphrased prompt leak and a polite memo redirect). A t
 catches them, so they show what the LLM layer adds. The same test shows the policy engine still
 refuses to execute them if the LLM misses too.
 
-Engineering evidence: 106 automated tests (94% line coverage), CI on every push, and 0 axe-core
+Engineering evidence: 109 automated tests (94% line coverage), CI on every push, and 0 axe-core
 WCAG 2.1 A/AA violations.
 
 ## Honest limits

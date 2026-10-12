@@ -136,7 +136,7 @@ export default function EvalPage() {
         <figure className="card chart-card">
           <figcaption>
             <h2>Money moved wrongly: {none?.all.unauthorised_executions} without a firewall, 0 with Bankism</h2>
-            <p className="note">Transfers to a payee who isn&apos;t saved, or above the ₹10,000 step-up limit. Lower is better.</p>
+            <p className="note">Transfers an attacker caused, plus any to a payee who isn&apos;t saved or above ₹10,000 without an OTP. The same rule for every row. Lower is better.</p>
           </figcaption>
           <BarChart
             rows={results.map((r) => row(r, { n: r.all.unauthorised_executions }))}

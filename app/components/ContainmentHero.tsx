@@ -25,7 +25,7 @@ export default function ContainmentHero({ stats }: { stats: HeadlineStats }) {
       <dl className="stats">
         <div className="stat">
           <dt>
-            Wrong-payee or over-limit transfers in {stats.cases} test requests
+            Unauthorised transfers in {stats.cases} test requests
             <span className="stat-note">no firewall vs Bankism with live Gemini</span>
           </dt>
           <dd>
