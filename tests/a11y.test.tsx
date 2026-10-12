@@ -72,7 +72,7 @@ describe("accessibility", () => {
   it("eval page charts have no axe violations and print every value as text", async () => {
     const host = await mount(<EvalPage />, "div");
     expect(await axeViolations()).toEqual([]);
-    expect(host.querySelector(".eval-lede")?.textContent).toMatch(/54 of 114 .* 0 in every configuration/);
+    expect(host.querySelector(".eval-lede")?.textContent).toMatch(/56 of 114 .* 0 in every configuration/);
     // Every bar has a printed value, so no reading depends on colour or hover.
     const bars = host.querySelectorAll(".bar-track");
     expect(bars.length).toBeGreaterThan(0);

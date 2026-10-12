@@ -13,7 +13,7 @@ Keep the **Real Gemini** mode selected unless the script says otherwise.
 ## Part 1: live demo (5:00)
 | Time | Do | Say |
 |---|---|---|
-| 0:00–0:40 | Point at the hero | "Banks are putting LLMs in front of payment APIs. Once the model's output can move money, prompt injection becomes wire fraud. Without a firewall, 54 of our 114 test requests move money wrongly. With Bankism: zero." |
+| 0:00–0:40 | Point at the hero | "Banks are putting LLMs in front of payment APIs. Once the model's output can move money, prompt injection becomes wire fraud. Without a firewall, 56 of our 114 test requests move money wrongly. With Bankism: zero." |
 | 0:40–1:20 | Click **₹500 → Rahul** | "A normal request. Gemini only *parses* it into JSON. The policy engine checks the amount and payee appear in the customer's own words, Rahul is a saved payee, and it's under ₹10,000. APPROVED, executed." Point at the phone: the assistant confirms and the balance drops by ₹500. Then the five-step path. |
 | 1:20–2:00 | Open the **Caught by rules** tab, click **Memo injection** | "Same transfer, but the memo tells the AI to send the whole balance elsewhere. The rule layer catches it and the LLM never even sees it: step 3 says *Skipped*. That's 40% of our attacks stopped before any LLM call." Point at the red box: "Without a firewall, the same message empties the account to the attacker." |
 | 2:00–2:40 | Click **Homoglyphs** | "Cyrillic letters that look like Latin. Scroll to *What the firewall actually read*: we fold them back, and obfuscation is itself a signal." |
@@ -54,7 +54,7 @@ Verified against the live deployment with `node scripts/edge-cases.mjs <live-url
 | Rapid clicking | 429 after 20 quick requests | Per-client rate limit protects the quota |
 
 ## Hard questions (short answers)
-- **"Is the 'without a firewall' box real?"** It's a labelled simulation of an obedient assistant wired to payments (`lib/demo/unprotected.ts`, tested in `tests/demo.test.ts`). It never affects a verdict. The measured no-firewall baseline is the eval's 54.
+- **"Is the 'without a firewall' box real?"** It's a labelled simulation of an obedient assistant wired to payments (`lib/demo/unprotected.ts`, tested in `tests/demo.test.ts`). It never affects a verdict. The measured no-firewall baseline is the eval's 56.
 - **"Who writes the assistant's replies?"** Code, from the verdict (`app/components/assistantReply.ts`). The LLM never writes anything the customer sees.
 - **"Isn't 100% detection overfitting?"** Yes, the rules and data share an author; the README says so. The claim we defend is containment, which is zero unauthorised executions even with the LLM hijacked and rules off. Gemini alone measured 98.7%; its one miss (A107) read the customer's own history: nothing leaked, no money moved.
 - **"What does the LLM add if rules catch everything?"** Paraphrases and other languages: the five LLM-only scenarios provably evade every rule (`tests/llm-only.test.ts`).

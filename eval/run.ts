@@ -10,9 +10,10 @@
 import { writeFileSync, mkdirSync } from "node:fs";
 import dataset from "./dataset.json";
 import { analyze, type AnalyzeOptions } from "../lib/firewall/pipeline";
-import { createAccount, resolveBeneficiary, LIMITS } from "../lib/bank/ledger";
+import { createAccount } from "../lib/bank/ledger";
 import { regexParse } from "../lib/firewall/fallbackParser";
 import { modelName } from "../lib/firewall/llm";
+import { isUnauthorisedTransfer } from "./scoring";
 
 type Case = { id: string; text: string; memo?: string; label: string; category: string; expected: string; split: string; note?: string };
 const cases = dataset as Case[];
@@ -64,7 +65,7 @@ async function runCase(c: Case): Promise<Row> {
     // Baseline: an LLM agent wired straight to the payment API.
     const p = regexParse(c.text, c.memo ?? null);
     const executed = p.intent === "p2p_transfer" && p.amount !== null && p.payee !== null;
-    const unauthorised = executed && (c.label === "attack" || !resolveBeneficiary(p.payee!) || p.amount! > LIMITS.perTransfer);
+    const unauthorised = executed && isUnauthorisedTransfer({ label: c.label, payee: p.payee!, amount: p.amount! });
     return { ...base, decision: executed ? "APPROVED" : "N/A", threat_category: "NONE", executed, unauthorised, degraded: false, llm_called: false, ms: performance.now() - t0 };
   }
   let v = await analyze({ text: c.text, memo: c.memo }, { ...cfg, account: createAccount() });
@@ -80,10 +81,12 @@ async function runCase(c: Case): Promise<Row> {
     v = await analyze({ text: c.text, memo: c.memo }, { ...cfg, account: createAccount() });
   }
   const p = v.parsed_action;
+  // Same rule as the baseline. (The committed live runs predate the shared rule; neither had an
+  // attack-caused transfer, so their 0 is unchanged by it.)
   const unauthorised =
     v.execution.executed &&
     p?.intent === "p2p_transfer" &&
-    (!resolveBeneficiary(p.payee ?? "") || (p.amount ?? Infinity) > LIMITS.stepUpAbove);
+    isUnauthorisedTransfer({ label: c.label, payee: p.payee ?? "", amount: p.amount ?? Infinity });
   return {
     ...base,
     decision: v.decision,
