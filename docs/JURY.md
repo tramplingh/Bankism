@@ -78,6 +78,13 @@ on stage. Answer the question the jury is really asking: *why is yours smaller?*
 - **"Where is the AI in a keyword or regex firewall?"** Ask it of any design, including ours. In
   Bankism, Gemini parses every request that the rules let through, and the five LLM-only presets
   show attacks that no rule matches (`tests/llm-only.test.ts`).
+- **"Others also keep the LLM out of execution. What's different?"** Ask what happens when detection
+  misses. If any well-formed recipient can be paid up to the limit, a paraphrase that fools both the
+  rules and the classifier moves money. In Bankism, a payee who isn't saved goes to OTP whatever the
+  detectors say, and the payee must appear in the customer's own words. Show **Compromised AI**.
+- **"Others have a conversational agent with memory. Why are your replies so plain?"** Our replies are
+  written by code from the verdict. A model that writes the customer-facing text, with 20 turns of
+  memory, can be talked into saying a transfer happened when it didn't. That's a channel we chose not to open.
 - **"Unicode normalisation handles look-alike letters, doesn't it?"** NFKC alone doesn't. It leaves
   Cyrillic `і` and `о` as they are. That's why step 1 folds homoglyphs explicitly. Show the
   **Homoglyphs** preset.
