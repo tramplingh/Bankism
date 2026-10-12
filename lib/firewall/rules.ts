@@ -1,16 +1,3 @@
-/**
- * L2 — Deterministic signature rules.
- *
- * Each rule has ONE fixed severity. The request's risk is the MAX severity hit,
- * never a weighted sum (weights would be arbitrary and indefensible).
- *   CRITICAL → block immediately, LLM is never called
- *   HIGH     → block
- *   MEDIUM   → step-up (REVIEW)
- *
- * Rules scan every L1 view (base, collapsed, leet, decoded, reversed). A hit that
- * only appears in a de-obfuscated view is re-labelled OBFUSCATION. Any hit inside
- * the payment memo is re-labelled MEMO_INJECTION.
- */
 import type { Signal, ThreatCategory } from "../types";
 import type { NormalizeResult } from "./normalize";
 
