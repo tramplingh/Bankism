@@ -25,13 +25,17 @@ interface ChatMessage {
   text: string;
   memo?: string;
   decision?: Decision;
+  /** Customer turns: which AI parsed it. Assistant turns: the parser failed and the safe fallback answered. */
+  mode?: Mode;
+  degraded?: boolean;
 }
 
 const PRESET_GROUPS = [
-  { kind: "ben", title: "Legitimate customer", icon: "✓", tone: "ok" },
-  { kind: "atk", title: "Attacks the rule layer catches", icon: "⚠", tone: "bad" },
-  { kind: "llm", title: "Attacks only the AI catches (no rule matches; needs Real Gemini)", icon: "◆", tone: "ai" },
-] as const satisfies readonly { kind: Preset["kind"]; title: string; icon: string; tone: string }[];
+  { kind: "ben", title: "Legitimate", icon: "✓", tone: "ok", note: "Ordinary customers, including ones that look suspicious but aren't." },
+  { kind: "atk", title: "Caught by rules", icon: "⚠", tone: "bad", note: "Known attack patterns. Stopped before the AI sees them." },
+  { kind: "llm", title: "Caught by the AI", icon: "◆", tone: "ai", note: "No rule matches these. Gemini flags them, so use Real Gemini." },
+] as const satisfies readonly { kind: Preset["kind"]; title: string; icon: string; tone: string; note: string }[];
+const TAB_ORDER = PRESET_GROUPS.map((g) => g.kind);
 
 const START = createAccount();
 const GREETING: ChatMessage = {
@@ -56,6 +60,7 @@ export default function Console() {
   const [chat, setChat] = useState<ChatMessage[]>([GREETING]);
   const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [status, setStatus] = useState("");
+  const [tab, setTab] = useState<Preset["kind"]>("ben");
   const resultHeading = useRef<HTMLHeadingElement>(null);
   const chatBox = useRef<HTMLOListElement>(null);
 
@@ -77,7 +82,7 @@ export default function Console() {
     setBusy(true);
     setError(null);
     setStatus("Analyzing request…");
-    say({ role: "customer", text: t, memo: m || undefined });
+    say({ role: "customer", text: t, memo: m || undefined, mode: md });
     const unprotected = simulateUnprotected(t, m || null, balance, md);
     try {
       const r = await fetch("/api/analyze", {
@@ -100,7 +105,7 @@ export default function Console() {
       }
       setLast({ verdict: v, unprotected, balance: next });
       setSubmitted({ text: t, memo: m });
-      say({ role: "assistant", text: assistantReply(v, next), decision: v.decision });
+      say({ role: "assistant", text: assistantReply(v, next), decision: v.decision, degraded: v.degraded });
       setAudit((a) => [{ at: clock(), text: t, memo: m, mode: md, unprotectedHarm: unprotected.harm, verdict: v }, ...a]);
       setStatus(announce(v));
     } catch (e) {
@@ -112,6 +117,15 @@ export default function Console() {
       // Move keyboard and screen-reader focus to the result (also scrolls it into view on phones).
       requestAnimationFrame(() => resultHeading.current?.focus());
     }
+  }
+
+  // Arrow keys move between tabs (WAI-ARIA tabs pattern).
+  function onTabKey(e: React.KeyboardEvent) {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    const i = TAB_ORDER.indexOf(tab);
+    const next = TAB_ORDER[(i + (e.key === "ArrowRight" ? 1 : TAB_ORDER.length - 1)) % TAB_ORDER.length];
+    setTab(next);
+    document.getElementById(`tab-${next}`)?.focus();
   }
 
   function runPreset(p: Preset) {
@@ -133,30 +147,48 @@ export default function Console() {
       </div>
 
       <div className="card scenarios">
-        <h3>One-click scenarios</h3>
-        <div className="scenario-groups">
+        <div className="scenarios-head">
+          <h3 id="scenarios-title">One-click scenarios</h3>
+          <p className="hint">Runs with the AI selected in the app below.</p>
+        </div>
+        <div className="tabs" role="tablist" aria-labelledby="scenarios-title" onKeyDown={onTabKey}>
           {PRESET_GROUPS.map((g) => (
-            <div key={g.kind}>
-              <p className="caption" id={`presets-${g.kind}`}>{g.title}</p>
-              <ul className="presets" aria-labelledby={`presets-${g.kind}`}>
-                {PRESETS.filter((p) => p.kind === g.kind).map((p) => (
-                  <li key={p.label}>
-                    <button type="button" className={`preset preset-${g.tone}`} disabled={busy} onClick={() => runPreset(p)}>
-                      <span aria-hidden="true">{g.icon}</span> {p.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <button
+              key={g.kind}
+              type="button"
+              role="tab"
+              id={`tab-${g.kind}`}
+              aria-selected={tab === g.kind}
+              aria-controls={`panel-${g.kind}`}
+              tabIndex={tab === g.kind ? 0 : -1}
+              className={`tab tab-${g.tone}`}
+              onClick={() => setTab(g.kind)}
+            >
+              <span aria-hidden="true">{g.icon}</span> {g.title}
+            </button>
           ))}
         </div>
-        <p className="hint">Each scenario runs with the AI selected below. Try the attacks again with the compromised AI.</p>
+        {PRESET_GROUPS.map((g) => (
+          <div key={g.kind} role="tabpanel" id={`panel-${g.kind}`} aria-labelledby={`tab-${g.kind}`} hidden={tab !== g.kind}>
+            <p className="hint tab-note">{g.note}</p>
+            <ul className="presets">
+              {PRESETS.filter((p) => p.kind === g.kind).map((p) => (
+                <li key={p.label}>
+                  <button type="button" className={`preset preset-${g.tone}`} disabled={busy} onClick={() => runPreset(p)}>
+                    <span aria-hidden="true">{g.icon}</span> {p.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
 
       <div className="grid">
         <div className="col phone" role="region" aria-label="Customer's banking app">
-          <div className="app-bar" aria-hidden="true">
-            <span className="brand-mark">◆</span> Bankism Bank <span className="app-bar-sub">Assistant</span>
+          <div className={`app-bar ${mode === "compromised" ? "app-bar-evil" : ""}`}>
+            <span className="brand-mark" aria-hidden="true">◆</span> Bankism Bank
+            <span className="app-bar-sub">{mode === "compromised" ? "⚠ Compromised AI" : "Assistant · Gemini"}</span>
           </div>
 
           <div className="acct-card">
@@ -186,6 +218,8 @@ export default function Console() {
                 <span className="sr-only">{c.role === "customer" ? "You: " : "Assistant: "}</span>
                 {c.text}
                 {c.memo && <span className="bubble-memo">Memo: {c.memo}</span>}
+                {c.mode && <span className={`bubble-mode bubble-mode-${c.mode}`}>AI: {c.mode === "compromised" ? "Compromised (attacker)" : "Real Gemini"}</span>}
+                {c.degraded && <span className="bubble-note">Gemini unavailable for this request: safe fallback parser used</span>}
                 {c.decision && (
                   <span className={`bubble-tag tag-${c.decision}`}>
                     <span aria-hidden="true">{DECISION_ICON[c.decision]} </span>
