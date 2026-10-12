@@ -62,7 +62,7 @@ a flattery jailbreak, a paraphrased prompt leak and a polite memo redirect). A t
 catches them, so they show what the LLM layer adds. The same test shows the policy engine still
 refuses to execute them if the LLM misses too.
 
-Engineering evidence: 105 automated tests (94% line coverage), CI on every push, and 0 axe-core
+Engineering evidence: 106 automated tests (94% line coverage), CI on every push, and 0 axe-core
 WCAG 2.1 A/AA violations.
 
 ## Honest limits

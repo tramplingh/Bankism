@@ -13,6 +13,7 @@ import Console from "@/app/components/Console";
 import ContainmentHero from "@/app/components/ContainmentHero";
 import { headlineStats } from "@/lib/evalStats";
 import EvalPage from "@/app/eval/page";
+import ThemeToggle, { THEME_KEY } from "@/app/components/ThemeToggle";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -139,6 +140,22 @@ describe("accessibility", () => {
     expect(host.querySelector('[role="tab"][aria-selected="true"]')?.id).toBe("tab-atk");
     expect(host.querySelector<HTMLElement>("#panel-atk")?.hidden).toBe(false);
     expect(await axeViolations()).toEqual([]);
+  });
+
+  it("theme toggle switches light/dark, says what it will do, and remembers the choice", async () => {
+    document.documentElement.removeAttribute("data-theme");
+    localStorage.clear();
+    const host = await mount(<ThemeToggle />, "div");
+    const btn = host.querySelector("button")!;
+    expect(btn.getAttribute("aria-label")).toBe("Switch to dark theme");
+    await act(async () => btn.click());
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(localStorage.getItem(THEME_KEY)).toBe("dark");
+    expect(btn.getAttribute("aria-label")).toBe("Switch to light theme");
+    await act(async () => btn.click());
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(await axeViolations()).toEqual([]);
+    document.documentElement.removeAttribute("data-theme");
   });
 
   it("exposes the AI mode as a labelled radio group and statuses as words, not colour", async () => {
