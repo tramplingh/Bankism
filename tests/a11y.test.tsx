@@ -100,6 +100,20 @@ describe("accessibility", () => {
     expect(document.activeElement?.id).toBe("result-title");
   });
 
+  it("one scenario fills the chat, the side-by-side, the five-step path and the audit log", async () => {
+    stubFetch();
+    const host = await mount(<Console />);
+    const preset = [...host.querySelectorAll("button")].find((b) => b.textContent?.includes("Memo injection"))!;
+    await act(async () => preset.click());
+    const bubbles = host.querySelectorAll(".chat .bubble");
+    expect(bubbles[bubbles.length - 1].textContent).toMatch(/can't do that.*Instructions hidden in memo/);
+    expect(host.querySelector(".compare .pane-bad")?.textContent).toMatch(/account 9999888877.*not a saved payee/);
+    expect(host.querySelector(".compare .pane-saved")?.textContent).toMatch(/Nothing executed/);
+    expect(host.querySelectorAll(".stepper .node")).toHaveLength(5);
+    expect(host.querySelectorAll(".audit tbody tr")).toHaveLength(1);
+    expect(host.querySelector(".audit-totals .ok")?.textContent).toMatch(/0\s*Unauthorised transfers|Unauthorised transfers\s*0/);
+  });
+
   it("exposes the AI mode as a labelled radio group and statuses as words, not colour", async () => {
     stubFetch();
     const host = await mount(<Console />);
