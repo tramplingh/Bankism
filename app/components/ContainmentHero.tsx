@@ -13,7 +13,9 @@ export default function ContainmentHero({ stats }: { stats: HeadlineStats }) {
   return (
     <section className="hero" aria-labelledby="hero-title">
       <p className="eyebrow">Blue-team AI firewall for LLM banking</p>
-      <h1 id="hero-title">A hijacked AI still can&apos;t move money.</h1>
+      <h1 id="hero-title">
+        A hijacked AI still <em>can&apos;t</em> move money.
+      </h1>
       <p className="lede">
         Gemini only <strong>reads</strong> the request. Deterministic code <strong>decides</strong>. Every request gets a
         verdict (<span className="t-ok">APPROVED</span>, <span className="t-warn">REVIEW</span> or{" "}
