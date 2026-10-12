@@ -77,6 +77,12 @@ describe("accessibility", () => {
     const bars = host.querySelectorAll(".bar-track");
     expect(bars.length).toBeGreaterThan(0);
     bars.forEach((b) => expect(b.querySelector(".bar-value")?.textContent).toBeTruthy());
+    // Headings must not contradict the bars: Gemini alone is 98.7% contained, so don't claim containment never drops.
+    const headings = [...host.querySelectorAll(".chart-card h2")].map((h) => h.textContent ?? "");
+    expect(headings.join(" | ")).not.toMatch(/Containment doesn.t/i);
+    expect(headings.join(" | ")).toMatch(/No money moves wrongly/);
+    // The legitimate-customer chart states its real base: 35 that should go through, 1 correctly blocked.
+    expect(host.querySelector("#legit-base")?.textContent).toMatch(/35 legitimate requests.*36th.*correctly blocked/);
   });
 
   it("console has no axe violations before and after a verdict", async () => {

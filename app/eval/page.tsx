@@ -70,6 +70,17 @@ function load(): Result[] {
     .sort((a, b) => ORDER.indexOf(a.config) - ORDER.indexOf(b.config));
 }
 
+/** Legitimate cases split by what they should get: the eval's false-block and OTP rates exclude the ones that should be blocked. */
+function benignBase(): { total: number; shouldBlock: number } {
+  try {
+    const raw = JSON.parse(readFileSync(path.join(process.cwd(), "eval", "dataset.json"), "utf8"));
+    const benign = ((raw.cases ?? raw) as { label: string; expected: string }[]).filter((c) => c.label === "benign");
+    return { total: benign.length, shouldBlock: benign.filter((c) => c.expected === "BLOCKED").length };
+  } catch {
+    return { total: 0, shouldBlock: 0 };
+  }
+}
+
 const fmt = (n: number | null, suffix = "%") => (n === null ? "—" : `${n}${suffix}`);
 const round1 = (n: number) => Math.round(n * 10) / 10;
 const row = (r: Result, values: Record<string, number>): Row => ({ ...SHORT[r.config], values });
@@ -84,6 +95,8 @@ export default function EvalPage() {
   const bankism = results.filter((r) => r.config !== "none");
   const worstBankism = Math.max(0, ...bankism.map((r) => r.all.unauthorised_executions));
   const cases = (live ?? det)?.all;
+  const legit = benignBase();
+  const ordinal = (n: number) => `${n}${n % 10 === 1 && n % 100 !== 11 ? "st" : n % 10 === 2 && n % 100 !== 12 ? "nd" : n % 10 === 3 && n % 100 !== 13 ? "rd" : "th"}`;
 
   return (
     <>
@@ -135,7 +148,7 @@ export default function EvalPage() {
 
         <figure className="card chart-card">
           <figcaption>
-            <h2>Detection can drop. Containment doesn&apos;t.</h2>
+            <h2>Fewer attacks are refused as layers come off. No money moves wrongly.</h2>
             <p className="note">
               <b>Blocked</b>: the attack was refused outright. <b>Contained</b>: the attack executed nothing. With the AI
               hijacked and rules off, only {fmt(hijacked?.all.attack_block_rate ?? null)} of attacks are refused, yet none
@@ -154,8 +167,9 @@ export default function EvalPage() {
             format={(v) => `${v}%`}
           />
           <p className="note">
-            Gemini alone missed one attack (case A107, asking for another account&apos;s history). It still couldn&apos;t
-            leak anything: reads always use the logged-in customer&apos;s own account.
+            Gemini alone let one attack through (case A107, asking for another account&apos;s history). What executed was a
+            read of the logged-in customer&apos;s own history, because reads always use the session account: nothing leaked
+            and no money moved. That is why containment shows {fmt(by("live-norules")?.all.attack_containment_rate ?? null)} while unauthorised transfers stay at 0.
           </p>
         </figure>
 
@@ -166,6 +180,13 @@ export default function EvalPage() {
               Medium-risk requests go to an OTP instead of a hard block. A hijacked AI can deny service, but it can&apos;t
               steal.
             </p>
+            {legit.shouldBlock === 1 && (
+              <p className="note" id="legit-base">
+                Out of {legit.total - legit.shouldBlock} legitimate requests that should go through (the{" "}
+                {ordinal(legit.total)} is over the ₹25,000 limit and is correctly blocked). OTP here means large amounts and
+                new payees, exactly where a bank should ask.
+              </p>
+            )}
           </figcaption>
           <StackedChart
             rows={["live", "live-norules", "deterministic", "compromised-norules"].flatMap((c) => {
