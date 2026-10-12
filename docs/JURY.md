@@ -14,12 +14,12 @@ Keep the **Real Gemini** mode selected unless the script says otherwise.
 | Time | Do | Say |
 |---|---|---|
 | 0:00–0:40 | Point at the hero | "Banks are putting LLMs in front of payment APIs. Once the model's output can move money, prompt injection becomes wire fraud. Without a firewall, 54 of our 114 test requests move money wrongly. With Bankism: zero." |
-| 0:40–1:20 | Click **₹500 → Rahul** | "A normal request. Gemini only *parses* it into JSON. The policy engine checks the amount and payee appear in the customer's own words, Rahul is a saved payee, and it's under ₹10,000. APPROVED, executed." Point at the trace and the highlighted words. |
-| 1:20–2:00 | Click **Memo injection** | "Same transfer, but the memo tells the AI to send the whole balance elsewhere. The rule layer catches it and the LLM never even sees it: step 3 says *Skipped*. That's 40% of our attacks stopped before any LLM call." |
+| 0:40–1:20 | Click **₹500 → Rahul** | "A normal request. Gemini only *parses* it into JSON. The policy engine checks the amount and payee appear in the customer's own words, Rahul is a saved payee, and it's under ₹10,000. APPROVED, executed." Point at the phone: the assistant confirms and the balance drops by ₹500. Then the five-step path. |
+| 1:20–2:00 | Click **Memo injection** | "Same transfer, but the memo tells the AI to send the whole balance elsewhere. The rule layer catches it and the LLM never even sees it: step 3 says *Skipped*. That's 40% of our attacks stopped before any LLM call." Point at the red box: "Without a firewall, the same message empties the account to the attacker." |
 | 2:00–2:40 | Click **Homoglyphs** | "Cyrillic letters that look like Latin. Scroll to *What the firewall actually read*: we fold them back, and obfuscation is itself a signal." |
 | 2:40–3:30 | Click **Insider claim** (LLM-only group) | "No rule matches this; it's a polite paraphrase. Gemini flags it as a policy override, so it's BLOCKED. That's what the LLM adds. And if Gemini had missed it? Vikram isn't a saved payee, so it still couldn't execute." |
-| 3:30–4:40 | Select **Compromised AI**, click **₹500 → Rahul** | "Now the money shot: we replace Gemini with an attacker. It tries to send the ₹500 to Vikram and reports no threat. BLOCKED: *payee not named in the customer's message*. A hijacked AI can't move money. It can only make us refuse service." |
-| 4:40–5:00 | Open `/eval` | "Every number is measured and committed: live Gemini, Gemini alone, compromised AI with rules off. Unauthorised executions are zero in every row." |
+| 3:30–4:40 | Select **Compromised AI**, click **₹500 → Rahul** | "Now the money shot: we replace Gemini with an attacker. It tries to send the ₹500 to Vikram and reports no threat. BLOCKED: *payee not named in the customer's message*. A hijacked AI can't move money. It can only make us refuse service." The red box shows what the same hijacked AI does with no firewall. |
+| 4:40–5:00 | Scroll to the audit log, then open `/eval` | "Every request this session is logged: unauthorised transfers, zero. And every number is measured and committed: live Gemini, Gemini alone, compromised AI with rules off. Unauthorised executions are zero in every row." |
 
 ## Part 2: architecture and prompt defence (3:00)
 Use deck slides 3 and 4.
@@ -54,6 +54,8 @@ Verified against the live deployment with `node scripts/edge-cases.mjs <live-url
 | Rapid clicking | 429 after 20 quick requests | Per-client rate limit protects the quota |
 
 ## Hard questions (short answers)
+- **"Is the 'without a firewall' box real?"** It's a labelled simulation of an obedient assistant wired to payments (`lib/demo/unprotected.ts`, tested in `tests/demo.test.ts`). It never affects a verdict. The measured no-firewall baseline is the eval's 54.
+- **"Who writes the assistant's replies?"** Code, from the verdict (`app/components/assistantReply.ts`). The LLM never writes anything the customer sees.
 - **"Isn't 100% detection overfitting?"** Yes, the rules and data share an author; the README says so. The claim we defend is containment, which is zero unauthorised executions even with the LLM hijacked and rules off. Gemini alone measured 98.7%; its one miss was contained.
 - **"What does the LLM add if rules catch everything?"** Paraphrases and other languages: the five LLM-only scenarios provably evade every rule (`tests/llm-only.test.ts`).
 - **"Why not Llama Guard / NeMo / Lakera?"** They classify, they don't authorise; none knows saved payees, limits or grounding. Any could plug in as another signal.
@@ -76,6 +78,13 @@ on stage. Answer the question the jury is really asking: *why is yours smaller?*
 - **"Where is the AI in a keyword or regex firewall?"** Ask it of any design, including ours. In
   Bankism, Gemini parses every request that the rules let through, and the five LLM-only presets
   show attacks that no rule matches (`tests/llm-only.test.ts`).
+- **"Others also keep the LLM out of execution. What's different?"** Ask what happens when detection
+  misses. If any well-formed recipient can be paid up to the limit, a paraphrase that fools both the
+  rules and the classifier moves money. In Bankism, a payee who isn't saved goes to OTP whatever the
+  detectors say, and the payee must appear in the customer's own words. Show **Compromised AI**.
+- **"Others have a conversational agent with memory. Why are your replies so plain?"** Our replies are
+  written by code from the verdict. A model that writes the customer-facing text, with 20 turns of
+  memory, can be talked into saying a transfer happened when it didn't. That's a channel we chose not to open.
 - **"Unicode normalisation handles look-alike letters, doesn't it?"** NFKC alone doesn't. It leaves
   Cyrillic `і` and `о` as they are. That's why step 1 folds homoglyphs explicitly. Show the
   **Homoglyphs** preset.
