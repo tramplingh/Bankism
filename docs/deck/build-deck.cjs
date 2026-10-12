@@ -25,7 +25,7 @@ const THEME = {
 };
 const H = THEME.colors;
 const OUT = path.join(__dirname, "Bankism.pptx");
-const LIVE_URL = "bankism-9xa67dbum-anishs-projects-f0db1d35.vercel.app";
+const LIVE_URL = "banksim-firewall.vercel.app";
 
 (async () => {
   const pres = new pptxgen();
@@ -262,9 +262,9 @@ const LIVE_URL = "bankism-9xa67dbum-anishs-projects-f0db1d35.vercel.app";
     T(s, b, { objectName: `impact-b-${i}`, x, y: 2.42, w: 2.75, h: 0.8, fontSize: 11, color: "C9D3E3" });
   });
   s.addShape(pres.shapes.RECTANGLE, { objectName: "quality-strip", x: 0.6, y: 3.45, w: 8.8, h: 0.62, fill: { color: "16263D" }, line: { color: "16263D" } });
-  T(s, "91 automated tests  ·  85% branch coverage  ·  CI on every push  ·  0 axe-core accessibility violations  ·  31 of 78 attacks stopped before any LLM call", { objectName: "quality-text", x: 0.8, y: 3.45, w: 8.4, h: 0.62, fontSize: 11, color: "E6EDF7", valign: "middle" });
+  T(s, "93 automated tests  ·  94% line coverage  ·  CI on every push  ·  0 axe-core accessibility violations  ·  31 of 78 attacks stopped before any LLM call", { objectName: "quality-text", x: 0.8, y: 3.45, w: 8.4, h: 0.62, fontSize: 11, color: "E6EDF7", valign: "middle" });
   T(s, `Try it: ${LIVE_URL}  ·  github.com/tramplingh/bankism`, { objectName: "cta", x: 0.6, y: 4.45, w: 8.8, h: 0.35, fontSize: 12, bold: true, color: "7FD1C7" });
-  s.addNotes("Any bank or fintech can drop this in front of an LLM assistant without trusting the model. It keeps friction low (OTP instead of block) and leaves an audit trail. Engineering evidence: 91 tests, 85 percent branch coverage, CI on every push, zero automated accessibility violations. Next steps: a blind red-team set, multi-turn support, and learned classifiers as extra signals while the policy engine stays the boundary.");
+  s.addNotes("Any bank or fintech can drop this in front of an LLM assistant without trusting the model. It keeps friction low (OTP instead of block) and leaves an audit trail. Engineering evidence: 93 tests, 94 percent line coverage, CI on every push, zero automated accessibility violations. Next steps: a blind red-team set, multi-turn support, and learned classifiers as extra signals while the policy engine stays the boundary.");
 
   await pres.writeFile({ fileName: OUT });
   if (process.argv[2]) await require(process.argv[2]).applyTheme(OUT, THEME);

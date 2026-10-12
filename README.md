@@ -7,7 +7,7 @@
 > machine-readable JSON verdict (**APPROVED / REVIEW / BLOCKED**, risk level, threat category,
 > rationale), and only `APPROVED` can ever execute.
 
-**Live demo:** https://bankism-j1e9m0xsq-anishs-projects-f0db1d35.vercel.app/ · **Eval dashboard:** `/eval` on the live site ·
+**Live demo:** https://banksim-firewall.vercel.app/ · **Eval dashboard:** `/eval` on the live site ·
 **Abstract:** [ABSTRACT.md](ABSTRACT.md) · **Threat model:** [SECURITY.md](SECURITY.md) · **Deck:** [docs/deck/Bankism.pdf](docs/deck/Bankism.pdf)
 
 ## Evidence at a glance
@@ -19,7 +19,7 @@ Every number below comes from a committed file you can open without running anyt
 | **Security** | Containment: **0 unauthorised executions** in every configuration, including the LLM replaced by an attacker *and* the rule layer off ([`eval/results/compromised-norules.json`](eval/results/compromised-norules.json)). Fail-closed paths are tested ([`invariants.test.ts`](tests/invariants.test.ts)). HTTP hardening (CSP, frame, sniff, referrer and permissions headers) is in [`next.config.mjs`](next.config.mjs) and tested in [`api.test.ts`](tests/api.test.ts). Full threat model in [SECURITY.md](SECURITY.md). |
 | **Code quality** | Each layer is one small module under [`lib/firewall/`](lib/firewall); [`pipeline.ts`](lib/firewall/pipeline.ts) is an orchestrator over named steps. Strict TypeScript, Zod at every trust boundary, ESLint ([`eslint.config.mjs`](eslint.config.mjs)), and UI split into [`app/components/`](app/components). CI runs lint, typecheck, tests, eval and build ([`ci.yml`](.github/workflows/ci.yml)). |
 | **Efficiency** | 31 of 114 requests (40% of attacks) are stopped by deterministic layers **before any LLM call** (`llm_calls_avoided` in [`eval/results/deterministic.json`](eval/results/deterministic.json)). Identical requests reuse a cached LLM parse ([`cachedParser.ts`](lib/firewall/cachedParser.ts)); a per-client token bucket protects the shared quota ([`rateLimit.ts`](lib/server/rateLimit.ts)); the landing page is static HTML. Deterministic layers take p50 0.1 ms; the full stack with Gemini p50 1.3 s. |
-| **Testing** | **91 tests** (Vitest) across 9 suites, **84% line / 85% branch coverage** ([`docs/reports/coverage-summary.json`](docs/reports/coverage-summary.json)). Tests were written before the detection logic (visible in git history). There is a labelled 114-case dataset with a hash-fixed dev/held-out split ([`eval/dataset.json`](eval/dataset.json)) and six ablation configurations, including two live Gemini runs. |
+| **Testing** | **93 tests** (Vitest) across 9 suites, **94% line / 82% branch coverage** ([`docs/reports/coverage-summary.json`](docs/reports/coverage-summary.json)). Tests were written before the detection logic (visible in git history). There is a labelled 114-case dataset with a hash-fixed dev/held-out split ([`eval/dataset.json`](eval/dataset.json)) and six ablation configurations, including two live Gemini runs. |
 | **Accessibility** | axe-core reports 0 WCAG 2.1 A/AA violations ([`a11y.test.tsx`](tests/a11y.test.tsx)). The verdict is announced in a live region, focus moves to the result, there's a skip link and landmarks, statuses are shown as icon + word (never colour alone), touch targets are 44 px, focus rings are visible, and it supports reduced motion and light/dark themes. |
 
 ## The idea: containment over detection
@@ -136,7 +136,7 @@ It runs without a key too: the LLM layer reports degraded mode, read-only reques
 | Command | What it does |
 |---|---|
 | `npm run verify` | Everything CI runs: lint, typecheck, tests with coverage, offline eval, production build |
-| `npm test` | 91 Vitest tests: normalization, grounding, compromised-LLM invariants, fail-closed, API contract, efficiency, LLM-only scenarios, code injection, accessibility |
+| `npm test` | 93 Vitest tests: normalization, grounding, compromised-LLM invariants, fail-closed, API contract, efficiency, LLM-only scenarios, code injection, accessibility |
 | `npm run eval` | Offline ablation evals (no key) → `eval/results/*.json` |
 | `npm run eval:llm` / `eval:llm-norules` | Live Gemini runs (need `GEMINI_API_KEY`); a run with any failed LLM call is refused, not published |
 
