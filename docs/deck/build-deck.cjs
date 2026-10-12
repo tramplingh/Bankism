@@ -25,7 +25,7 @@ const THEME = {
 };
 const H = THEME.colors;
 const OUT = path.join(__dirname, "Bankism.pptx");
-const LIVE_URL = "bankism-j1e9m0xsq-anishs-projects-f0db1d35.vercel.app";
+const LIVE_URL = "bankism-ten.vercel.app";
 
 (async () => {
   const pres = new pptxgen();

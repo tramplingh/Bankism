@@ -7,7 +7,7 @@
 > machine-readable JSON verdict (**APPROVED / REVIEW / BLOCKED**, risk level, threat category,
 > rationale), and only `APPROVED` can ever execute.
 
-**Live demo:** https://bankism-j1e9m0xsq-anishs-projects-f0db1d35.vercel.app/ · **Eval dashboard:** `/eval` on the live site ·
+**Live demo:** https://bankism-ten.vercel.app/ · **Eval dashboard:** `/eval` on the live site ·
 **Abstract:** [ABSTRACT.md](ABSTRACT.md) · **Threat model:** [SECURITY.md](SECURITY.md) · **Deck:** [docs/deck/Bankism.pdf](docs/deck/Bankism.pdf)
 
 ## Evidence at a glance
