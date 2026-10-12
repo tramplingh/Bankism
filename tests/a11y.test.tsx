@@ -114,6 +114,21 @@ describe("accessibility", () => {
     expect(host.querySelector(".audit-totals .ok")?.textContent).toMatch(/0\s*Unauthorised transfers|Unauthorised transfers\s*0/);
   });
 
+  it("makes the compromised-AI mode and degraded parsing impossible to miss in the chat", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) =>
+      new Response(JSON.stringify(init?.method === "POST" ? { ...verdict, degraded: true } : { llm: "configured", model: "gemini-test" }), { status: 200 }),
+    ));
+    const host = await mount(<Console />);
+    const evil = host.querySelector<HTMLInputElement>('input[value="compromised"]')!;
+    await act(async () => evil.click());
+    expect(host.querySelector(".app-bar")?.textContent).toMatch(/Compromised AI/);
+    const preset = [...host.querySelectorAll("button")].find((b) => b.textContent?.includes("₹500 → Rahul"))!;
+    await act(async () => preset.click());
+    expect(host.querySelector(".bubble-customer")?.textContent).toMatch(/AI: Compromised/);
+    const replies = host.querySelectorAll(".bubble-assistant");
+    expect(replies[replies.length - 1].textContent).toMatch(/Gemini unavailable/);
+  });
+
   it("exposes the AI mode as a labelled radio group and statuses as words, not colour", async () => {
     stubFetch();
     const host = await mount(<Console />);

@@ -324,3 +324,7 @@ td.num { font-family: var(--mono); }
 .audit-text { overflow-wrap: anywhere; min-width: 200px; }
 .dec { font-weight: 800; white-space: nowrap; }
 .dec-APPROVED { color: var(--ok); } .dec-REVIEW { color: var(--warn); } .dec-BLOCKED { color: var(--bad); }
+.app-bar-evil { background: var(--bad-bg); color: var(--bad); } .app-bar-evil .app-bar-sub { color: var(--bad); font-weight: 800; }
+.bubble-mode { font-size: 12px; font-weight: 700; opacity: .9; }
+.bubble-mode-compromised { align-self: flex-start; background: var(--bad-bg); color: var(--bad); padding: 1px 8px; border-radius: 999px; opacity: 1; }
+.bubble-note { font-size: 13px; color: var(--warn); font-weight: 600; }

@@ -25,6 +25,9 @@ interface ChatMessage {
   text: string;
   memo?: string;
   decision?: Decision;
+  /** Customer turns: which AI parsed it. Assistant turns: the parser failed and the safe fallback answered. */
+  mode?: Mode;
+  degraded?: boolean;
 }
 
 const PRESET_GROUPS = [
@@ -77,7 +80,7 @@ export default function Console() {
     setBusy(true);
     setError(null);
     setStatus("Analyzing request…");
-    say({ role: "customer", text: t, memo: m || undefined });
+    say({ role: "customer", text: t, memo: m || undefined, mode: md });
     const unprotected = simulateUnprotected(t, m || null, balance, md);
     try {
       const r = await fetch("/api/analyze", {
@@ -100,7 +103,7 @@ export default function Console() {
       }
       setLast({ verdict: v, unprotected, balance: next });
       setSubmitted({ text: t, memo: m });
-      say({ role: "assistant", text: assistantReply(v, next), decision: v.decision });
+      say({ role: "assistant", text: assistantReply(v, next), decision: v.decision, degraded: v.degraded });
       setAudit((a) => [{ at: clock(), text: t, memo: m, mode: md, unprotectedHarm: unprotected.harm, verdict: v }, ...a]);
       setStatus(announce(v));
     } catch (e) {
@@ -155,8 +158,9 @@ export default function Console() {
 
       <div className="grid">
         <div className="col phone" role="region" aria-label="Customer's banking app">
-          <div className="app-bar" aria-hidden="true">
-            <span className="brand-mark">◆</span> Bankism Bank <span className="app-bar-sub">Assistant</span>
+          <div className={`app-bar ${mode === "compromised" ? "app-bar-evil" : ""}`}>
+            <span className="brand-mark" aria-hidden="true">◆</span> Bankism Bank
+            <span className="app-bar-sub">{mode === "compromised" ? "⚠ Compromised AI" : "Assistant · Gemini"}</span>
           </div>
 
           <div className="acct-card">
@@ -186,6 +190,8 @@ export default function Console() {
                 <span className="sr-only">{c.role === "customer" ? "You: " : "Assistant: "}</span>
                 {c.text}
                 {c.memo && <span className="bubble-memo">Memo: {c.memo}</span>}
+                {c.mode && <span className={`bubble-mode bubble-mode-${c.mode}`}>AI: {c.mode === "compromised" ? "Compromised (attacker)" : "Real Gemini"}</span>}
+                {c.degraded && <span className="bubble-note">Gemini unavailable for this request: safe fallback parser used</span>}
                 {c.decision && (
                   <span className={`bubble-tag tag-${c.decision}`}>
                     <span aria-hidden="true">{DECISION_ICON[c.decision]} </span>
